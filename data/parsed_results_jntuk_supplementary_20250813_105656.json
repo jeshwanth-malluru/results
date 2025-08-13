@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "format": "jntuk",
+    "exam_type": "supplementary",
+    "processed_at": "2025-08-13T10:56:56.064721",
+    "total_students": 0,
+    "original_filename": "Result of I B.Tech I Semester (R19R20R23) Regular  Supplementary Examinations, Jan-2024.pdf",
+    "processing_status": "completed",
+    "year": "1 Year",
+    "semesters": [
+      "Semester 1"
+    ],
+    "completed_at": "2025-08-13T10:57:35.991114",
+    "firebase_enabled": false
+  },
+  "firebase_upload": {
+    "batches_completed": 0,
+    "students_saved": 0,
+    "duplicates_skipped": 0,
+    "upload_started_at": "",
+    "upload_completed_at": "2025-08-13T10:57:35.991123",
+    "final_saved_count": 0,
+    "final_skipped_count": 0,
+    "firebase_available": false
+  },
+  "students": []
+}

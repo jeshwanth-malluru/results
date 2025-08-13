@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "format": "jntuk",
+    "exam_type": "regular",
+    "processed_at": "2025-08-13T11:03:39.075464",
+    "total_students": 0,
+    "original_filename": "BTECH 2-1 RESULT FEB 2025.pdf",
+    "processing_status": "completed",
+    "year": "2 Year",
+    "semesters": [
+      "Semester 2"
+    ],
+    "completed_at": "2025-08-13T11:04:29.751962",
+    "firebase_enabled": true
+  },
+  "firebase_upload": {
+    "batches_completed": 0,
+    "students_saved": 0,
+    "duplicates_skipped": 0,
+    "upload_started_at": "",
+    "upload_completed_at": "2025-08-13T11:04:29.751973",
+    "final_saved_count": 0,
+    "final_skipped_count": 0,
+    "firebase_available": true
+  },
+  "students": []
+}

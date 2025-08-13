@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training & Placement Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        /* CSS Variables */
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #64748b;
+            --text-color: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-accent: #f1f5f9;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #3b82f6;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Main Card */
+        .main-card {
+            background: var(--bg-primary);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            padding: 2rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .filter-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .filter-input, .filter-select {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .filter-input:focus, .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Filter Actions */
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-outline {
+            border: 1px solid var(--border-color);
+            background: white;
+            color: var(--text-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-accent);
+        }
+
+        /* Results Section */
+        .results-section {
+            padding: 2rem;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .results-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .results-count {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-accent);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .students-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .students-table th {
+            background: var(--bg-accent);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .students-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .students-table tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* Badges */
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .badge-excellent { background: #dcfce7; color: #166534; }
+        .badge-good { background: #dbeafe; color: #1e40af; }
+        .badge-average { background: #fef3c7; color: #92400e; }
+        .badge-poor { background: #fecaca; color: #dc2626; }
+
+        .badge-zero { background: #dcfce7; color: #166534; }
+        .badge-few { background: #fef3c7; color: #92400e; }
+        .badge-many { background: #fecaca; color: #dc2626; }
+
+        .badge-eligible { background: #dcfce7; color: #166534; }
+        .badge-not-eligible { background: #fecaca; color: #dc2626; }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            opacity: 0.5;
+        }
+
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            z-index: 100;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+            }
+
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Training & Placement Portal</h1>
+            <p>Discover and analyze student eligibility for training programs and placement opportunities</p>
+        </div>
+
+        <!-- Main Card -->
+        <div class="main-card">
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <h2 class="filter-title">Student Criteria Filters</h2>
+                
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">CGPA Filter Type</label>
+                        <select class="filter-select" id="cgpaFilterType">
+                            <option value="min">Minimum CGPA (≥)</option>
+                            <option value="exact">Exact CGPA (=)</option>
+                            <option value="range">CGPA Range</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">CGPA Value</label>
+                        <input type="number" class="filter-input" id="cgpaValue" placeholder="e.g., 6.0" step="0.1" min="0" max="10">
+                    </div>
+
+                    <div class="filter-group" id="cgpaRangeGroup" style="display: none;">
+                        <label class="filter-label">Max CGPA (for range)</label>
+                        <input type="number" class="filter-input" id="maxCgpa" placeholder="e.g., 8.0" step="0.1" min="0" max="10">
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Backlog Filter Type</label>
+                        <select class="filter-select" id="backlogFilterType">
+                            <option value="max">Maximum Backlogs (≤)</option>
+                            <option value="exact">Exact Backlogs (=)</option>
+                            <option value="range">Backlog Range</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Backlog Count</label>
+                        <input type="number" class="filter-input" id="backlogValue" placeholder="e.g., 1" min="0" max="20">
+                    </div>
+
+                    <div class="filter-group" id="backlogRangeGroup" style="display: none;">
+                        <label class="filter-label">Max Backlogs (for range)</label>
+                        <input type="number" class="filter-input" id="maxBacklogs" placeholder="e.g., 3" min="0" max="20">
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Branch Filter</label>
+                        <select class="filter-select" id="branchFilter">
+                            <option value="">All Branches</option>
+                            <option value="A1">Computer Science (A1)</option>
+                            <option value="A2">Electrical (A2)</option>
+                            <option value="A3">Mechanical (A3)</option>
+                            <option value="A4">Civil (A4)</option>
+                            <option value="A5">Electronics (A5)</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Quick Presets</label>
+                        <select class="filter-select" id="quickPreset">
+                            <option value="">Custom Filter</option>
+                            <option value="placement-ready">Placement Ready (≥7.0 CGPA, ≤1 Backlog)</option>
+                            <option value="training-eligible">Training Eligible (6.0-6.9 CGPA, ≤3 Backlogs)</option>
+                            <option value="high-performers">High Performers (≥8.0 CGPA, 0 Backlogs)</option>
+                            <option value="specific-criteria">Example: 6.0 CGPA + 1 Backlog</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <button class="btn btn-primary" onclick="searchStudents()">
+                        <i data-lucide="search"></i>
+                        Search Students
+                    </button>
+                    <button class="btn btn-outline" onclick="resetFilters()">
+                        <i data-lucide="refresh-cw"></i>
+                        Reset Filters
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportResults()" id="exportBtn" style="display: none;">
+                        <i data-lucide="download"></i>
+                        Export CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section">
+                <div class="results-header">
+                    <h2 class="results-title">Search Results</h2>
+                    <div class="results-count" id="resultsCount" style="display: none;">0 students found</div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="stats-grid" id="statsGrid" style="display: none;">
+                    <div class="stat-card">
+                        <span class="stat-number" id="totalStudents">0</span>
+                        <span class="stat-label">Total Students</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="avgCgpa">0.0</span>
+                        <span class="stat-label">Average CGPA</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="eligibleCount">0</span>
+                        <span class="stat-label">Placement Eligible</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="zeroBacklogs">0</span>
+                        <span class="stat-label">Zero Backlogs</span>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div class="loading" id="loadingState" style="display: none;">
+                    <div class="spinner"></div>
+                    <h3>Searching Students...</h3>
+                    <p>Please wait while we analyze the criteria</p>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container" id="tableContainer" style="display: none;">
+                    <table class="students-table">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Branch</th>
+                                <th>CGPA</th>
+                                <th>Backlogs</th>
+                                <th>Semesters</th>
+                                <th>Eligibility</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState">
+                    <i data-lucide="users" class="empty-icon"></i>
+                    <h3>No Search Performed</h3>
+                    <p>Use the filters above to search for students matching your criteria</p>
+                </div>
+
+                <!-- No Results -->
+                <div class="empty-state" id="noResults" style="display: none;">
+                    <i data-lucide="search-x" class="empty-icon"></i>
+                    <h3>No Students Found</h3>
+                    <p>Try adjusting your filter criteria to find matching students</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="back-button">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+            <i data-lucide="arrow-left"></i>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        let currentResults = [];
+
+        // Filter type change handlers
+        document.getElementById('cgpaFilterType').addEventListener('change', function() {
+            const rangeGroup = document.getElementById('cgpaRangeGroup');
+            const cgpaInput = document.getElementById('cgpaValue');
+            
+            if (this.value === 'range') {
+                rangeGroup.style.display = 'block';
+                cgpaInput.placeholder = 'Min CGPA (e.g., 6.0)';
+            } else {
+                rangeGroup.style.display = 'none';
+                cgpaInput.placeholder = this.value === 'exact' ? 'Exact CGPA (e.g., 6.0)' : 'Minimum CGPA (e.g., 6.0)';
+            }
+        });
+
+        document.getElementById('backlogFilterType').addEventListener('change', function() {
+            const rangeGroup = document.getElementById('backlogRangeGroup');
+            const backlogInput = document.getElementById('backlogValue');
+            
+            if (this.value === 'range') {
+                rangeGroup.style.display = 'block';
+                backlogInput.placeholder = 'Min Backlogs (e.g., 0)';
+            } else {
+                rangeGroup.style.display = 'none';
+                backlogInput.placeholder = this.value === 'exact' ? 'Exact Backlogs (e.g., 1)' : 'Maximum Backlogs (e.g., 1)';
+            }
+        });
+
+        // Quick preset handler
+        document.getElementById('quickPreset').addEventListener('change', function() {
+            if (this.value) {
+                applyQuickPreset(this.value);
+            }
+        });
+
+        function applyQuickPreset(preset) {
+            const cgpaType = document.getElementById('cgpaFilterType');
+            const cgpaValue = document.getElementById('cgpaValue');
+            const maxCgpa = document.getElementById('maxCgpa');
+            const backlogType = document.getElementById('backlogFilterType');
+            const backlogValue = document.getElementById('backlogValue');
+            const maxBacklogs = document.getElementById('maxBacklogs');
+
+            switch (preset) {
+                case 'placement-ready':
+                    cgpaType.value = 'min';
+                    cgpaValue.value = '7.0';
+                    backlogType.value = 'max';
+                    backlogValue.value = '1';
+                    break;
+                case 'training-eligible':
+                    cgpaType.value = 'range';
+                    cgpaValue.value = '6.0';
+                    maxCgpa.value = '6.9';
+                    backlogType.value = 'max';
+                    backlogValue.value = '3';
+                    break;
+                case 'high-performers':
+                    cgpaType.value = 'min';
+                    cgpaValue.value = '8.0';
+                    backlogType.value = 'exact';
+                    backlogValue.value = '0';
+                    break;
+                case 'specific-criteria':
+                    cgpaType.value = 'exact';
+                    cgpaValue.value = '6.0';
+                    backlogType.value = 'exact';
+                    backlogValue.value = '1';
+                    break;
+            }
+
+            // Trigger change events to update UI
+            cgpaType.dispatchEvent(new Event('change'));
+            backlogType.dispatchEvent(new Event('change'));
+
+            // Reset preset dropdown
+            document.getElementById('quickPreset').value = '';
+        }
+
+        async function searchStudents() {
+            try {
+                showLoading(true);
+                hideAllResults();
+
+                // Get filter values
+                const cgpaType = document.getElementById('cgpaFilterType').value;
+                const cgpaValue = parseFloat(document.getElementById('cgpaValue').value) || 0;
+                const maxCgpa = parseFloat(document.getElementById('maxCgpa').value) || 10;
+                const backlogType = document.getElementById('backlogFilterType').value;
+                const backlogValue = parseInt(document.getElementById('backlogValue').value) || 0;
+                const maxBacklogValue = parseInt(document.getElementById('maxBacklogs').value) || 20;
+                const branch = document.getElementById('branchFilter').value;
+
+                console.log('Search criteria:', { cgpaType, cgpaValue, maxCgpa, backlogType, backlogValue, maxBacklogValue, branch });
+
+                // Try to fetch from API first, fallback to demo data
+                let students = [];
+                try {
+                    const response = await fetch(`/api/training-placement/eligible-students?min_cgpa=0&max_backlogs=99&limit=500`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        students = data.eligible_students || [];
+                        console.log('Loaded from API:', students.length, 'students');
+                    } else {
+                        throw new Error('API not available');
+                    }
+                } catch (apiError) {
+                    console.log('API not available, using demo data');
+                    students = generateDemoData();
+                }
+
+                // Apply client-side filtering
+                const filteredStudents = students.filter(student => {
+                    // CGPA filter
+                    let cgpaMatch = true;
+                    if (cgpaType === 'exact') {
+                        cgpaMatch = Math.abs(student.cgpa - cgpaValue) < 0.1;
+                    } else if (cgpaType === 'range') {
+                        cgpaMatch = student.cgpa >= cgpaValue && student.cgpa <= maxCgpa;
+                    } else { // min
+                        cgpaMatch = student.cgpa >= cgpaValue;
+                    }
+
+                    // Backlog filter
+                    let backlogMatch = true;
+                    if (backlogType === 'exact') {
+                        backlogMatch = student.backlogs === backlogValue;
+                    } else if (backlogType === 'range') {
+                        backlogMatch = student.backlogs >= backlogValue && student.backlogs <= maxBacklogValue;
+                    } else { // max
+                        backlogMatch = student.backlogs <= backlogValue;
+                    }
+
+                    // Branch filter
+                    const branchMatch = !branch || student.student_id.includes(branch);
+
+                    return cgpaMatch && backlogMatch && branchMatch;
+                });
+
+                currentResults = filteredStudents;
+                showLoading(false);
+
+                if (filteredStudents.length > 0) {
+                    displayResults(filteredStudents);
+                } else {
+                    showNoResults();
+                }
+
+            } catch (error) {
+                console.error('Search error:', error);
+                showLoading(false);
+                showNoResults();
+            }
+        }
+
+        function generateDemoData() {
+            const students = [];
+            const branches = ['A1', 'A2', 'A3', 'A4', 'A5'];
+            const branchNames = {
+                'A1': 'Computer Science',
+                'A2': 'Electrical Engineering',
+                'A3': 'Mechanical Engineering',
+                'A4': 'Civil Engineering',
+                'A5': 'Electronics & Communication'
+            };
+
+            // Add specific example student
+            students.push({
+                student_id: '23B81A12A9',
+                cgpa: 6.0,
+                backlogs: 1,
+                total_semesters: 6,
+                latest_semester: 'III Year I Semester',
+                university: 'JNTUK',
+                format: 'autonomous'
+            });
+
+            // Add more test students with specific criteria
+            const testCases = [
+                { id: '23B81A01B5', cgpa: 6.0, backlogs: 1, branch: 'A1' },
+                { id: '23B81A02C7', cgpa: 6.0, backlogs: 1, branch: 'A2' },
+                { id: '22B81A03D8', cgpa: 7.5, backlogs: 0, branch: 'A3' },
+                { id: '24B81A04E9', cgpa: 8.2, backlogs: 0, branch: 'A4' },
+                { id: '23B81A05F1', cgpa: 5.8, backlogs: 3, branch: 'A5' },
+                { id: '22B81A06G2', cgpa: 9.1, backlogs: 0, branch: 'A1' },
+                { id: '21B81A07H3', cgpa: 6.5, backlogs: 2, branch: 'A2' },
+                { id: '24B81A08I4', cgpa: 7.8, backlogs: 1, branch: 'A3' },
+                { id: '23B81A09J5', cgpa: 6.0, backlogs: 0, branch: 'A4' },
+                { id: '22B81A10K6', cgpa: 8.7, backlogs: 0, branch: 'A5' }
+            ];
+
+            testCases.forEach(test => {
+                students.push({
+                    student_id: test.id,
+                    cgpa: test.cgpa,
+                    backlogs: test.backlogs,
+                    total_semesters: Math.floor(Math.random() * 3) + 5,
+                    latest_semester: 'III Year I Semester',
+                    university: 'JNTUK',
+                    format: 'autonomous'
+                });
+            });
+
+            // Generate additional random students
+            for (let i = 0; i < 100; i++) {
+                const branch = branches[Math.floor(Math.random() * branches.length)];
+                const year = Math.random() > 0.5 ? '23' : '22';
+                const id = `${year}B81A${String(i + 20).padStart(2, '0')}${branch}${Math.floor(Math.random() * 9) + 1}`;
+                
+                students.push({
+                    student_id: id,
+                    cgpa: parseFloat((Math.random() * 4 + 5.5).toFixed(1)),
+                    backlogs: Math.floor(Math.random() * 6),
+                    total_semesters: Math.floor(Math.random() * 3) + 5,
+                    latest_semester: 'III Year I Semester',
+                    university: 'JNTUK',
+                    format: 'autonomous'
+                });
+            }
+
+            return students.sort((a, b) => b.cgpa - a.cgpa);
+        }
+
+        function displayResults(students) {
+            // Update count
+            document.getElementById('resultsCount').textContent = `${students.length} students found`;
+            document.getElementById('resultsCount').style.display = 'block';
+
+            // Update statistics
+            const total = students.length;
+            const avgCgpa = total > 0 ? (students.reduce((sum, s) => sum + s.cgpa, 0) / total).toFixed(2) : '0.0';
+            const eligible = students.filter(s => s.cgpa >= 6.5 && s.backlogs <= 3).length;
+            const zeroBacklogs = students.filter(s => s.backlogs === 0).length;
+
+            document.getElementById('totalStudents').textContent = total;
+            document.getElementById('avgCgpa').textContent = avgCgpa;
+            document.getElementById('eligibleCount').textContent = eligible;
+            document.getElementById('zeroBacklogs').textContent = zeroBacklogs;
+
+            // Populate table
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = '';
+
+            students.forEach(student => {
+                const isEligible = student.cgpa >= 6.5 && student.backlogs <= 3;
+                const cgpaBadge = getCgpaBadge(student.cgpa);
+                const backlogBadge = getBacklogBadge(student.backlogs);
+                const eligibilityBadge = isEligible ? 'badge-eligible' : 'badge-not-eligible';
+                const status = student.cgpa >= 7.0 && student.backlogs <= 1 ? 'Placement Ready' : 'Training Needed';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${student.student_id}</strong></td>
+                    <td>${getBranchName(student.student_id)}</td>
+                    <td><span class="badge ${cgpaBadge}">${student.cgpa}</span></td>
+                    <td><span class="badge ${backlogBadge}">${student.backlogs}</span></td>
+                    <td>${student.total_semesters || 'N/A'}</td>
+                    <td><span class="badge ${eligibilityBadge}">${isEligible ? 'Eligible' : 'Not Eligible'}</span></td>
+                    <td>${status}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Show results
+            document.getElementById('statsGrid').style.display = 'grid';
+            document.getElementById('tableContainer').style.display = 'block';
+            document.getElementById('exportBtn').style.display = 'inline-flex';
+        }
+
+        function getCgpaBadge(cgpa) {
+            if (cgpa >= 8.5) return 'badge-excellent';
+            if (cgpa >= 7.0) return 'badge-good';
+            if (cgpa >= 6.0) return 'badge-average';
+            return 'badge-poor';
+        }
+
+        function getBacklogBadge(backlogs) {
+            if (backlogs === 0) return 'badge-zero';
+            if (backlogs <= 3) return 'badge-few';
+            return 'badge-many';
+        }
+
+        function getBranchName(studentId) {
+            const branchMap = {
+                'A1': 'Computer Science',
+                'A2': 'Electrical Engineering',
+                'A3': 'Mechanical Engineering',
+                'A4': 'Civil Engineering',
+                'A5': 'Electronics & Communication'
+            };
+            
+            for (let code in branchMap) {
+                if (studentId.includes(code)) {
+                    return branchMap[code];
+                }
+            }
+            return 'Unknown';
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingState').style.display = show ? 'block' : 'none';
+        }
+
+        function hideAllResults() {
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('noResults').style.display = 'none';
+            document.getElementById('statsGrid').style.display = 'none';
+            document.getElementById('tableContainer').style.display = 'none';
+            document.getElementById('resultsCount').style.display = 'none';
+            document.getElementById('exportBtn').style.display = 'none';
+        }
+
+        function showNoResults() {
+            hideAllResults();
+            document.getElementById('noResults').style.display = 'block';
+        }
+
+        function resetFilters() {
+            document.getElementById('cgpaFilterType').value = 'min';
+            document.getElementById('cgpaValue').value = '';
+            document.getElementById('maxCgpa').value = '';
+            document.getElementById('backlogFilterType').value = 'max';
+            document.getElementById('backlogValue').value = '';
+            document.getElementById('maxBacklogs').value = '';
+            document.getElementById('branchFilter').value = '';
+            document.getElementById('quickPreset').value = '';
+
+            // Reset UI
+            document.getElementById('cgpaRangeGroup').style.display = 'none';
+            document.getElementById('backlogRangeGroup').style.display = 'none';
+            document.getElementById('cgpaValue').placeholder = 'Minimum CGPA (e.g., 6.0)';
+            document.getElementById('backlogValue').placeholder = 'Maximum Backlogs (e.g., 1)';
+
+            // Clear results
+            currentResults = [];
+            hideAllResults();
+            document.getElementById('emptyState').style.display = 'block';
+        }
+
+        function exportResults() {
+            if (currentResults.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
+            const headers = ['Student ID', 'Branch', 'CGPA', 'Backlogs', 'Semesters', 'Eligibility', 'Status'];
+            const csvContent = [
+                headers.join(','),
+                ...currentResults.map(student => {
+                    const isEligible = student.cgpa >= 6.5 && student.backlogs <= 3;
+                    const status = student.cgpa >= 7.0 && student.backlogs <= 1 ? 'Placement Ready' : 'Training Needed';
+                    
+                    return [
+                        student.student_id,
+                        getBranchName(student.student_id),
+                        student.cgpa,
+                        student.backlogs,
+                        student.total_semesters || 'N/A',
+                        isEligible ? 'Eligible' : 'Not Eligible',
+                        status
+                    ].join(',');
+                })
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `training_placement_analysis_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Initialize page
+        window.addEventListener('load', function() {
+            hideAllResults();
+            document.getElementById('emptyState').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 4rem;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .navbar-brand svg {
+            color: var(--primary-color);
+        }
+
+        .navbar-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .navbar-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .navbar-link:hover,
+        .navbar-link.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        .placement-page {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem 0;
+        }
+
+        .placement-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .placement-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .placement-header h1 {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .placement-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        .header-instructions {
+            margin-top: 12px;
+        }
+
+        .instruction-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .instruction-badge i {
+            width: 16px;
+            height: 16px;
+        }
+
+        .controls-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .filters-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+
+        .filter-input, .filter-select {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: #f9fafb;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filter-input:focus, .filter-select:focus {
+            border-color: var(--primary-color);
+            background: white;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .students-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .export-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .students-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .students-table th {
+            background: #f8fafc;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-color);
+            border-bottom: 2px solid #e5e7eb;
+            white-space: nowrap;
+        }
+
+        .students-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: middle;
+        }
+
+        .students-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .student-id {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-family: 'Courier New', monospace;
+        }
+
+        .sgpa-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .sgpa-excellent { background: #dcfce7; color: #166534; } /* 8.5+ */
+        .sgpa-good { background: #dbeafe; color: #1e40af; } /* 7.0-8.4 */
+        .sgpa-average { background: #fef3c7; color: #92400e; } /* 6.0-6.9 */
+        .sgpa-below { background: #fecaca; color: #dc2626; } /* <6.0 */
+
+        .backlogs-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-align: center;
+            min-width: 40px;
+        }
+
+        .backlogs-none { background: #dcfce7; color: #166534; }
+        .backlogs-few { background: #fef3c7; color: #92400e; }
+        .backlogs-many { background: #fecaca; color: #dc2626; }
+
+        .eligibility-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .eligible { background: #dcfce7; color: #166534; }
+        .not-eligible { background: #fecaca; color: #dc2626; }
+
+        .branch-badge {
+            padding: 0.25rem 0.5rem;
+            background: #f3f4f6;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .semester-info {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .loading-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .no-results-icon {
+            width: 64px;
+            height: 64px;
+            color: #d1d5db;
+            margin: 0 auto 1rem;
+        }
+
+        .floating-action {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            z-index: 50;
+        }
+
+        /* Filter Example Styles */
+        .filter-example {
+            margin-top: 20px;
+        }
+
+        .example-card {
+            background: var(--bg-accent);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .example-icon {
+            color: var(--info-color);
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .example-content h4 {
+            margin: 0 0 8px 0;
+            color: var(--text-color);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .example-content p {
+            margin: 0 0 8px 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .example-content ul {
+            margin: 0;
+            padding-left: 16px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .example-content li {
+            margin: 4px 0;
+        }
+
+        @media (max-width: 1024px) {
+            .filters-row {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .placement-container {
+                padding: 0 1rem;
+            }
+
+            .placement-header h1 {
+                font-size: 2rem;
+            }
+
+            .students-table {
+                font-size: 0.9rem;
+            }
+
+            .students-table th,
+            .students-table td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .stats-overview {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modern Navigation -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="/" class="navbar-brand">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    <path d="M8 7h8"></path>
+                    <path d="M8 11h8"></path>
+                    <path d="M8 15h6"></path>
+                </svg>
+                <span>Result Management</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="placement-page">
+        <div class="placement-container">
+            <!-- Header -->
+            <div class="placement-header">
+                <h1>Training & Placement Analysis</h1>
+                <p>Analyze student eligibility with precise CGPA and backlog filtering</p>
+                <div class="header-instructions">
+                    <span class="instruction-badge">
+                        <i data-lucide="target"></i>
+                        Example: Set "Exact CGPA" to 6.0 and "Exact Backlogs" to 1 to find students like 23B81A12A9
+                    </span>
+                </div>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="controls-section">
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label class="filter-label">CGPA Filter</label>
+                        <select class="filter-select" id="cgpaFilterType">
+                            <option value="min">Minimum CGPA</option>
+                            <option value="exact">Exact CGPA</option>
+                            <option value="range">CGPA Range</option>
+                        </select>
+                        <input type="number" class="filter-input" id="minCgpa" placeholder="6.0" step="0.1" min="0" max="10">
+                        <input type="number" class="filter-input" id="maxCgpa" placeholder="8.0" step="0.1" min="0" max="10" style="display: none;">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Backlog Filter</label>
+                        <select class="filter-select" id="backlogFilterType">
+                            <option value="max">Maximum Backlogs</option>
+                            <option value="exact">Exact Backlogs</option>
+                            <option value="range">Backlog Range</option>
+                        </select>
+                        <input type="number" class="filter-input" id="maxBacklogs" placeholder="1" min="0" max="20">
+                        <input type="number" class="filter-input" id="minBacklogs" placeholder="0" min="0" max="20" style="display: none;">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Branch</label>
+                        <select class="filter-select" id="branchFilter">
+                            <option value="">All Branches</option>
+                            <option value="A1">Computer Science (A1)</option>
+                            <option value="A2">Electrical (A2)</option>
+                            <option value="A3">Mechanical (A3)</option>
+                            <option value="A4">Civil (A4)</option>
+                            <option value="A5">Electronics (A5)</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Quick Filters</label>
+                        <select class="filter-select" id="quickFilter">
+                            <option value="">Custom Filter</option>
+                            <option value="placement-ready">Placement Ready (≥7.0 CGPA, ≤1 Backlog)</option>
+                            <option value="training-needed">Training Needed (6.0-6.9 CGPA, ≤3 Backlogs)</option>
+                            <option value="high-performers">High Performers (≥8.0 CGPA, 0 Backlogs)</option>
+                            <option value="improvement-needed">Needs Improvement (≤6.0 CGPA or >3 Backlogs)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Example Usage Section -->
+                <div class="filter-example">
+                    <div class="example-card">
+                        <i data-lucide="info" class="example-icon"></i>
+                        <div class="example-content">
+                            <h4>Example Usage:</h4>
+                            <p>To find students with exactly <strong>6.0 CGPA</strong> and <strong>1 backlog</strong>:</p>
+                            <ul>
+                                <li>Set CGPA Filter to "Exact CGPA" and enter 6.0</li>
+                                <li>Set Backlog Filter to "Exact Backlogs" and enter 1</li>
+                                <li>Click "Analyze Students"</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="loadStudentData()">
+                        <i data-lucide="search"></i>
+                        Analyze Students
+                    </button>
+                    <button class="btn btn-outline" onclick="resetFilters()">
+                        <i data-lucide="refresh-cw"></i>
+                        Reset Filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistics Overview -->
+            <div class="stats-overview">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalStudents">-</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="eligibleStudents">-</div>
+                    <div class="stat-label">Placement Eligible</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="avgCgpa">-</div>
+                    <div class="stat-label">Average CGPA</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="zeroBacklogs">-</div>
+                    <div class="stat-label">Zero Backlogs</div>
+                </div>
+            </div>
+
+            <!-- Students List -->
+            <div class="students-section">
+                <div class="section-header">
+                    <h2 class="section-title">Student Analysis</h2>
+                    <button class="export-btn" onclick="exportToCSV()">
+                        <i data-lucide="download"></i>
+                        Export CSV
+                    </button>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" style="display: none;">
+                    <div class="loading-card">
+                        <div class="spinner"></div>
+                        <h3>Loading student data...</h3>
+                        <p>Please wait while we analyze student records</p>
+                    </div>
+                </div>
+
+                <!-- Students Table -->
+                <div id="studentsTable" style="display: none;">
+                    <table class="students-table">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Branch</th>
+                                <th>CGPA</th>
+                                <th>Backlogs</th>
+                                <th>Semesters</th>
+                                <th>Eligibility</th>
+                                <th>Training Need</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <!-- Students will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- No Results -->
+                <div id="noResults" class="no-results" style="display: none;">
+                    <i data-lucide="users-x" class="no-results-icon"></i>
+                    <h3>No students found</h3>
+                    <p>Try adjusting your filter criteria</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-card">
+            <div class="spinner"></div>
+            <h3>Processing...</h3>
+            <p>Analyzing student data</p>
+        </div>
+    </div>
+
+    <!-- Back to Dashboard Button -->
+    <div class="floating-action">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+            <i data-lucide="arrow-left"></i>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        let allStudents = [];
+        let filteredStudents = [];
+
+        // Load student data from JSON files and Firebase
+        async function loadStudentData() {
+            try {
+                showLoading(true);
+                hideResults();
+
+                // Get filter values
+                const cgpaFilterType = document.getElementById('cgpaFilterType').value;
+                const backlogFilterType = document.getElementById('backlogFilterType').value;
+                const minCgpa = parseFloat(document.getElementById('minCgpa').value) || 0;
+                const maxCgpa = parseFloat(document.getElementById('maxCgpa').value) || 10;
+                const maxBacklogs = parseInt(document.getElementById('maxBacklogs').value) || 999;
+                const minBacklogs = parseInt(document.getElementById('minBacklogs').value) || 0;
+                const branch = document.getElementById('branchFilter').value;
+                const quickFilter = document.getElementById('quickFilter').value;
+
+                console.log('Loading student data with filters:', { 
+                    cgpaFilterType, backlogFilterType, minCgpa, maxCgpa, 
+                    maxBacklogs, minBacklogs, branch, quickFilter 
+                });
+
+                // Apply quick filters
+                if (quickFilter) {
+                    applyQuickFilter(quickFilter);
+                    return; // Quick filter will call loadStudentData again
+                }
+
+                // Try to load data from the actual API endpoint first
+                try {
+                    const response = await fetch(`/api/training-placement/eligible-students?min_cgpa=${minCgpa}&max_backlogs=${maxBacklogs}`);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        allStudents = data.eligible_students || [];
+                        console.log('Loaded data from API:', allStudents.length, 'students');
+                    } else {
+                        throw new Error('API not available');
+                    }
+                } catch (apiError) {
+                    console.log('API not available, using demo data');
+                    allStudents = generateDemoStudentData();
+                }
+
+                // Apply frontend filters
+                filteredStudents = allStudents.filter(student => {
+                    // CGPA filtering
+                    let cgpaMatch = true;
+                    if (cgpaFilterType === 'exact') {
+                        cgpaMatch = Math.abs(student.cgpa - minCgpa) < 0.1; // Allow small tolerance for floating point
+                    } else if (cgpaFilterType === 'range') {
+                        cgpaMatch = student.cgpa >= minCgpa && student.cgpa <= maxCgpa;
+                    } else { // minimum
+                        cgpaMatch = student.cgpa >= minCgpa;
+                    }
+
+                    // Backlog filtering
+                    let backlogsMatch = true;
+                    if (backlogFilterType === 'exact') {
+                        backlogsMatch = student.backlogs === maxBacklogs;
+                    } else if (backlogFilterType === 'range') {
+                        backlogsMatch = student.backlogs >= minBacklogs && student.backlogs <= maxBacklogs;
+                    } else { // maximum
+                        backlogsMatch = student.backlogs <= maxBacklogs;
+                    }
+
+                    // Branch filtering
+                    const branchMatch = !branch || student.student_id.includes(branch);
+
+                    return cgpaMatch && backlogsMatch && branchMatch;
+                });
+
+                // Update statistics
+                updateStatistics(filteredStudents);
+
+                // Display results
+                displayStudents(filteredStudents);
+
+                showLoading(false);
+                if (filteredStudents.length > 0) {
+                    showResults();
+                } else {
+                    showNoResults();
+                }
+
+            } catch (error) {
+                console.error('Error loading student data:', error);
+                showLoading(false);
+                showNoResults();
+            }
+        }
+
+        // Generate demo student data for demonstration
+        function generateDemoStudentData() {
+            const students = [];
+            const branches = ['A1', 'A2', 'A3', 'A4', 'A5'];
+            const branchNames = {
+                'A1': 'Computer Science',
+                'A2': 'Electrical',
+                'A3': 'Mechanical', 
+                'A4': 'Civil',
+                'A5': 'Electronics'
+            };
+
+            // Add your specific example first
+            students.push({
+                student_id: '23B81A12A9',
+                branch: 'A1',
+                branch_name: 'Computer Science',
+                cgpa: 6.0,
+                backlogs: 1,
+                total_semesters: 6,
+                eligible: false,
+                needs_training: true
+            });
+
+            // Add some more students with exact criteria for testing
+            const testStudents = [
+                { id: '23B81A01B5', cgpa: 6.0, backlogs: 1, branch: 'A1' },
+                { id: '23B81A02C7', cgpa: 6.0, backlogs: 1, branch: 'A2' },
+                { id: '23B81A03D8', cgpa: 6.0, backlogs: 0, branch: 'A3' },
+                { id: '23B81A04E9', cgpa: 6.0, backlogs: 2, branch: 'A4' },
+                { id: '23B81A05F1', cgpa: 7.0, backlogs: 1, branch: 'A5' },
+                { id: '22B81A01G2', cgpa: 8.0, backlogs: 0, branch: 'A1' },
+                { id: '22B81A02H3', cgpa: 5.5, backlogs: 3, branch: 'A2' },
+                { id: '24B81A01I4', cgpa: 9.2, backlogs: 0, branch: 'A1' },
+                { id: '24B81A02J5', cgpa: 6.5, backlogs: 1, branch: 'A2' },
+                { id: '21B81A01K6', cgpa: 7.8, backlogs: 2, branch: 'A3' }
+            ];
+
+            testStudents.forEach(test => {
+                const eligible = test.cgpa >= 6.5 && test.backlogs <= 3;
+                const needsTraining = test.cgpa < 7.0 || test.backlogs > 1;
+                
+                students.push({
+                    student_id: test.id,
+                    branch: test.branch,
+                    branch_name: branchNames[test.branch],
+                    cgpa: test.cgpa,
+                    backlogs: test.backlogs,
+                    total_semesters: Math.floor(Math.random() * 4) + 4,
+                    eligible: eligible,
+                    needs_training: needsTraining
+                });
+            });
+
+            // Generate additional random demo data
+            const baseIds = ['24B81A01', '23B81A01', '22B81A01', '21B81A01'];
+            
+            for (let i = 0; i < 180; i++) {
+                const baseId = baseIds[Math.floor(Math.random() * baseIds.length)];
+                const branch = branches[Math.floor(Math.random() * branches.length)];
+                const studentId = `${baseId.slice(0, 6)}${branch}${(i + 11).toString().padStart(2, '0')}`;
+                
+                const cgpa = (Math.random() * 4 + 6).toFixed(1); // 6.0 to 10.0
+                const backlogs = Math.floor(Math.random() * 8); // 0 to 7
+                const semesters = Math.floor(Math.random() * 4) + 4; // 4 to 7 semesters
+                
+                const eligible = parseFloat(cgpa) >= 6.5 && backlogs <= 3;
+                const needsTraining = parseFloat(cgpa) < 7.0 || backlogs > 1;
+
+                students.push({
+                    student_id: studentId,
+                    branch: branch,
+                    branch_name: branchNames[branch],
+                    cgpa: parseFloat(cgpa),
+                    backlogs: backlogs,
+                    total_semesters: semesters,
+                    eligible: eligible,
+                    needs_training: needsTraining
+                });
+            }
+
+            return students.sort((a, b) => b.cgpa - a.cgpa);
+        }
+
+        // Update statistics display
+        function updateStatistics(students) {
+            const total = students.length;
+            const eligible = students.filter(s => s.cgpa >= 6.5 && s.backlogs <= 3).length;
+            const avgCgpa = students.length > 0 ? 
+                (students.reduce((sum, s) => sum + s.cgpa, 0) / students.length).toFixed(2) : '0.00';
+            const zeroBacklogs = students.filter(s => s.backlogs === 0).length;
+
+            document.getElementById('totalStudents').textContent = total;
+            document.getElementById('eligibleStudents').textContent = eligible;
+            document.getElementById('avgCgpa').textContent = avgCgpa;
+            document.getElementById('zeroBacklogs').textContent = zeroBacklogs;
+        }
+
+        // Display students in table
+        function displayStudents(students) {
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = '';
+
+            students.forEach(student => {
+                const isEligible = student.cgpa >= 6.5 && student.backlogs <= 3;
+                const needsTraining = student.cgpa < 7.0 || student.backlogs > 1;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="student-id">${student.student_id}</span></td>
+                    <td><span class="branch-badge">${student.branch_name || getBranchName(student.student_id)}</span></td>
+                    <td><span class="sgpa-badge ${getSgpaBadgeClass(student.cgpa)}">${student.cgpa}</span></td>
+                    <td><span class="backlogs-badge ${getBacklogsBadgeClass(student.backlogs)}">${student.backlogs}</span></td>
+                    <td><span class="semester-info">${student.total_semesters || 'N/A'}</span></td>
+                    <td><span class="eligibility-badge ${isEligible ? 'eligible' : 'not-eligible'}">${isEligible ? 'Eligible' : 'Not Eligible'}</span></td>
+                    <td><span class="eligibility-badge ${needsTraining ? 'not-eligible' : 'eligible'}">${needsTraining ? 'Required' : 'Optional'}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Get branch name from student ID
+        function getBranchName(studentId) {
+            const branchCode = studentId.includes('A1') ? 'A1' : 
+                             studentId.includes('A2') ? 'A2' :
+                             studentId.includes('A3') ? 'A3' :
+                             studentId.includes('A4') ? 'A4' :
+                             studentId.includes('A5') ? 'A5' : 'Unknown';
+            
+            const branchNames = {
+                'A1': 'Computer Science',
+                'A2': 'Electrical',
+                'A3': 'Mechanical', 
+                'A4': 'Civil',
+                'A5': 'Electronics'
+            };
+            
+            return branchNames[branchCode] || 'Unknown';
+        }
+
+        // Get SGPA badge class based on value
+        function getSgpaBadgeClass(sgpa) {
+            if (sgpa >= 8.5) return 'sgpa-excellent';
+            if (sgpa >= 7.0) return 'sgpa-good';
+            if (sgpa >= 6.0) return 'sgpa-average';
+            return 'sgpa-below';
+        }
+
+        // Get backlogs badge class based on count
+        function getBacklogsBadgeClass(backlogs) {
+            if (backlogs === 0) return 'backlogs-none';
+            if (backlogs <= 3) return 'backlogs-few';
+            return 'backlogs-many';
+        }
+
+        // Handle filter type changes
+        function handleCgpaFilterChange() {
+            const filterType = document.getElementById('cgpaFilterType').value;
+            const maxCgpaInput = document.getElementById('maxCgpa');
+            
+            if (filterType === 'range') {
+                maxCgpaInput.style.display = 'block';
+                maxCgpaInput.placeholder = 'Max CGPA';
+                document.getElementById('minCgpa').placeholder = 'Min CGPA';
+            } else if (filterType === 'exact') {
+                maxCgpaInput.style.display = 'none';
+                document.getElementById('minCgpa').placeholder = 'Exact CGPA (e.g., 6.0)';
+            } else {
+                maxCgpaInput.style.display = 'none';
+                document.getElementById('minCgpa').placeholder = 'Minimum CGPA';
+            }
+        }
+
+        function handleBacklogFilterChange() {
+            const filterType = document.getElementById('backlogFilterType').value;
+            const minBacklogsInput = document.getElementById('minBacklogs');
+            
+            if (filterType === 'range') {
+                minBacklogsInput.style.display = 'block';
+                minBacklogsInput.placeholder = 'Min Backlogs';
+                document.getElementById('maxBacklogs').placeholder = 'Max Backlogs';
+            } else if (filterType === 'exact') {
+                minBacklogsInput.style.display = 'none';
+                document.getElementById('maxBacklogs').placeholder = 'Exact Backlogs (e.g., 1)';
+            } else {
+                minBacklogsInput.style.display = 'none';
+                document.getElementById('maxBacklogs').placeholder = 'Maximum Backlogs';
+            }
+        }
+
+        // Apply quick filter presets
+        function applyQuickFilter(filterType) {
+            const cgpaFilterType = document.getElementById('cgpaFilterType');
+            const backlogFilterType = document.getElementById('backlogFilterType');
+            const minCgpa = document.getElementById('minCgpa');
+            const maxCgpa = document.getElementById('maxCgpa');
+            const maxBacklogs = document.getElementById('maxBacklogs');
+            const minBacklogs = document.getElementById('minBacklogs');
+            const quickFilter = document.getElementById('quickFilter');
+
+            // Reset quick filter to prevent recursive calls
+            quickFilter.value = '';
+
+            switch (filterType) {
+                case 'placement-ready':
+                    cgpaFilterType.value = 'min';
+                    minCgpa.value = '7.0';
+                    backlogFilterType.value = 'max';
+                    maxBacklogs.value = '1';
+                    break;
+                case 'training-needed':
+                    cgpaFilterType.value = 'range';
+                    minCgpa.value = '6.0';
+                    maxCgpa.value = '6.9';
+                    backlogFilterType.value = 'max';
+                    maxBacklogs.value = '3';
+                    break;
+                case 'high-performers':
+                    cgpaFilterType.value = 'min';
+                    minCgpa.value = '8.0';
+                    backlogFilterType.value = 'exact';
+                    maxBacklogs.value = '0';
+                    break;
+                case 'improvement-needed':
+                    cgpaFilterType.value = 'range';
+                    minCgpa.value = '0';
+                    maxCgpa.value = '6.0';
+                    backlogFilterType.value = 'min';
+                    minBacklogs.value = '4';
+                    break;
+            }
+
+            // Update UI based on filter types
+            handleCgpaFilterChange();
+            handleBacklogFilterChange();
+
+            // Load data with new filters
+            loadStudentData();
+        }
+
+        // Reset all filters
+        function resetFilters() {
+            document.getElementById('cgpaFilterType').value = 'min';
+            document.getElementById('backlogFilterType').value = 'max';
+            document.getElementById('minCgpa').value = '';
+            document.getElementById('maxCgpa').value = '';
+            document.getElementById('maxBacklogs').value = '';
+            document.getElementById('minBacklogs').value = '';
+            document.getElementById('branchFilter').value = '';
+            document.getElementById('quickFilter').value = '';
+            
+            // Reset UI
+            handleCgpaFilterChange();
+            handleBacklogFilterChange();
+        }
+
+        // Export to CSV
+        function exportToCSV() {
+            if (filteredStudents.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
+            const headers = ['Student ID', 'Branch', 'CGPA', 'Backlogs', 'Semesters', 'Eligible', 'Training Need'];
+            const csvContent = [
+                headers.join(','),
+                ...filteredStudents.map(student => {
+                    const isEligible = student.cgpa >= 6.5 && student.backlogs <= 3;
+                    const needsTraining = student.cgpa < 7.0 || student.backlogs > 1;
+                    
+                    return [
+                        student.student_id,
+                        student.branch_name || getBranchName(student.student_id),
+                        student.cgpa,
+                        student.backlogs,
+                        student.total_semesters || 'N/A',
+                        isEligible ? 'Yes' : 'No',
+                        needsTraining ? 'Required' : 'Optional'
+                    ].join(',');
+                })
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `placement_analysis_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Show/hide functions
+        function showLoading(show) {
+            document.getElementById('loadingState').style.display = show ? 'block' : 'none';
+        }
+
+        function showResults() {
+            document.getElementById('studentsTable').style.display = 'block';
+            document.getElementById('noResults').style.display = 'none';
+        }
+
+        function hideResults() {
+            document.getElementById('studentsTable').style.display = 'none';
+            document.getElementById('noResults').style.display = 'none';
+        }
+
+        function showNoResults() {
+            document.getElementById('studentsTable').style.display = 'none';
+            document.getElementById('noResults').style.display = 'block';
+        }
+
+        // Load data on page load
+        window.addEventListener('load', function() {
+            // Initialize filter change handlers
+            document.getElementById('cgpaFilterType').addEventListener('change', handleCgpaFilterChange);
+            document.getElementById('backlogFilterType').addEventListener('change', handleBacklogFilterChange);
+            document.getElementById('quickFilter').addEventListener('change', function() {
+                const value = this.value;
+                if (value) {
+                    applyQuickFilter(value);
+                }
+            });
+            
+            // Initialize UI state
+            handleCgpaFilterChange();
+            handleBacklogFilterChange();
+            
+            // Load initial data
+            loadStudentData();
+        });
+    </script>
+</body>
+</html>

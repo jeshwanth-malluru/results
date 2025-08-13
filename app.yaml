@@ -1,0 +1,36 @@
+runtime: python311
+
+# Cloud Run configuration
+env_variables:
+  FLASK_ENV: production
+  PYTHONPATH: /app
+
+# Resource limits
+automatic_scaling:
+  min_instances: 0
+  max_instances: 10
+  target_cpu_utilization: 0.6
+
+# Instance configuration
+resources:
+  cpu: 2
+  memory_gb: 2
+
+# Health check
+liveness_check:
+  path: "/api/firebase-status"
+  check_interval_sec: 30
+  timeout_sec: 4
+  failure_threshold: 2
+  success_threshold: 2
+
+readiness_check:
+  path: "/api/firebase-status"
+  check_interval_sec: 5
+  timeout_sec: 4
+  failure_threshold: 2
+  success_threshold: 2
+  app_start_timeout_sec: 300
+
+# Security
+entrypoint: gunicorn --bind :$PORT --workers 4 --timeout 0 app:app

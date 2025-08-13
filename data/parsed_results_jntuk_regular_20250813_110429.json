@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "format": "jntuk",
+    "exam_type": "regular",
+    "processed_at": "2025-08-13T11:04:29.756071",
+    "total_students": 0,
+    "original_filename": "1st BTech 1st Sem (CR24) Results.pdf",
+    "processing_status": "completed",
+    "year": "1 Year",
+    "semesters": [
+      "Semester 1"
+    ],
+    "completed_at": "2025-08-13T11:04:35.687523",
+    "firebase_enabled": true
+  },
+  "firebase_upload": {
+    "batches_completed": 0,
+    "students_saved": 0,
+    "duplicates_skipped": 0,
+    "upload_started_at": "",
+    "upload_completed_at": "2025-08-13T11:04:35.687530",
+    "final_saved_count": 0,
+    "final_skipped_count": 0,
+    "firebase_available": true
+  },
+  "students": []
+}

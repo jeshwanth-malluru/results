@@ -1,0 +1,51 @@
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore virtual environment
+venv/
+env/
+.env
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore temporary files
+temp/
+*.tmp
+*.log
+
+# Ignore sensitive files (keep local copies)
+.env.local
+config.local.py
+
+# Ignore data files (too large for container)
+data/*.json
+data_backup/
+
+# Ignore test files
+test_*.py
+*_test.py
+
+# Ignore documentation build files
+docs/_build/
+
+# Ignore deployment artifacts
+.gcloudignore
+.dockerignore
+
+# Keep essential files for deployment
+!requirements.txt
+!Dockerfile
+!app.yaml
+!serviceAccount.json
+!deploy.sh
+!deploy.bat

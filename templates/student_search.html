@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Search - Result Management System</title>
+    
+    <!-- External Resources -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-50: #eff6ff;
+            --primary-100: #dbeafe;
+            --primary-200: #bfdbfe;
+            --primary-300: #93c5fd;
+            --primary-400: #60a5fa;
+            --primary-500: #3b82f6;
+            --primary-600: #2563eb;
+            --primary-700: #1d4ed8;
+            --primary-800: #1e40af;
+            --primary-900: #1e3a8a;
+            
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            --success-500: #10b981;
+            --warning-500: #f59e0b;
+            --error-500: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            color: var(--primary-700);
+        }
+
+        /* Navigation */
+        .navbar {
+            background: var(--primary-600);
+            box-shadow: 0 2px 10px rgba(37, 99, 235, 0.2);
+            border-bottom: 1px solid var(--primary-500);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+        }
+
+        .navbar-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .navbar-link {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .navbar-link:hover, .navbar-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            color: var(--primary-700);
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
+            border-radius: 16px;
+            border: 1px solid var(--primary-200);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--primary-800);
+        }
+
+        .header p {
+            font-size: 1.125rem;
+            color: var(--primary-600);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.1);
+            border: 2px solid var(--primary-200);
+            margin-bottom: 2rem;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 1rem;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--primary-700);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--primary-200);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-600);
+            color: white;
+            min-width: 140px;
+            justify-content: center;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-700);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary-700);
+            border: 2px solid var(--primary-300);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-50);
+            border-color: var(--primary-400);
+        }
+
+        /* Results Section */
+        .results-section {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.1);
+            border: 2px solid var(--primary-200);
+            overflow: hidden;
+        }
+
+        .results-header {
+            padding: 1.5rem 2rem;
+            background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
+            border-bottom: 1px solid var(--primary-200);
+        }
+
+        .results-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-800);
+            margin: 0;
+        }
+
+        .results-content {
+            padding: 2rem;
+        }
+
+        .student-card {
+            background: var(--primary-50);
+            border: 1px solid var(--primary-200);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .student-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15);
+            border-color: var(--primary-400);
+        }
+
+        .student-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .student-id {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-800);
+        }
+
+        .student-info {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .info-badge {
+            background: var(--primary-600);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .sgpa-badge {
+            background: var(--success-500);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .subject-card {
+            background: white;
+            border: 1px solid var(--primary-200);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .subject-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .subject-code {
+            font-weight: 600;
+            color: var(--primary-800);
+            font-size: 0.875rem;
+        }
+
+        .subject-grade {
+            font-weight: 700;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+
+        .grade-S, .grade-A { background: var(--success-500); color: white; }
+        .grade-B { background: var(--primary-500); color: white; }
+        .grade-C { background: var(--warning-500); color: white; }
+        .grade-D, .grade-F { background: var(--error-500); color: white; }
+
+        .consolidated-indicator {
+            background: linear-gradient(135deg, var(--warning-500), var(--primary-500));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .academic-progress {
+            background: linear-gradient(135deg, var(--primary-50), var(--primary-100));
+            border: 1px solid var(--primary-200);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .semester-card {
+            background: white;
+            border: 1px solid var(--primary-200);
+            border-radius: 8px;
+            padding: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .semester-card:hover {
+            border-color: var(--primary-400);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+        }
+
+        .consolidation-info {
+            background: linear-gradient(135deg, var(--gray-50), var(--primary-50));
+            border: 1px solid var(--primary-200);
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            color: var(--primary-700);
+            margin-top: 1rem;
+        }
+
+        .duplicates-removed {
+            background: linear-gradient(135deg, var(--warning-500), var(--error-500));
+            color: white;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+        }
+
+        .subject-name {
+            color: var(--primary-600);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .semester-section {
+            margin-bottom: 2rem;
+            border: 2px solid var(--primary-200);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .semester-section:hover {
+            border-color: var(--primary-400);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .semester-header {
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+            color: white;
+            padding: 1rem;
+            border-bottom: 1px solid var(--primary-300);
+        }
+
+        .semester-subjects {
+            padding: 1rem;
+            background: var(--gray-50);
+        }
+
+        .semester-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .semester-sgpa-badge {
+            background: var(--success-500);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .semester-count-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+        }
+
+        .subject-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--primary-500);
+        }
+
+        /* Loading and Empty States */
+        .loading-state, .empty-state, .error-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--primary-600);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--primary-200);
+            border-top: 3px solid var(--primary-600);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-icon, .error-icon {
+            font-size: 3rem;
+            color: var(--primary-400);
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar-menu {
+                display: none;
+            }
+            
+            .main-container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .search-form {
+                flex-direction: column;
+            }
+            
+            .form-group {
+                min-width: 100%;
+            }
+            
+            .subjects-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .student-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="/" class="navbar-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Result Management</span>
+            </a>
+            
+            <ul class="navbar-menu">
+                <li><a href="/" class="navbar-link">Dashboard</a></li>
+                <li><a href="/upload" class="navbar-link">Upload</a></li>
+                <li><a href="/student-search" class="navbar-link active">Search</a></li>
+                <li><a href="/admin/dashboard" class="navbar-link">Admin</a></li>
+            </ul>
+            
+            <button class="btn btn-secondary" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-search"></i> Student Search</h1>
+            <p>Search for student results by ID, semester, or academic criteria</p>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <form class="search-form" id="searchForm">
+                <div class="form-group">
+                    <label class="form-label" for="studentId">
+                        <i class="fas fa-id-card"></i> Student ID
+                    </label>
+                    <input 
+                        type="text" 
+                        id="studentId" 
+                        class="form-input" 
+                        placeholder="Enter student ID (e.g., 20B91A0501)"
+                        maxlength="15"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="semester">
+                        <i class="fas fa-calendar-alt"></i> Semester
+                    </label>
+                    <select id="semester" class="form-input">
+                        <option value="">All Semesters</option>
+                        <option value="Semester 1">Semester 1</option>
+                        <option value="Semester 2">Semester 2</option>
+                        <option value="Semester 3">Semester 3</option>
+                        <option value="Semester 4">Semester 4</option>
+                        <option value="Semester 5">Semester 5</option>
+                        <option value="Semester 6">Semester 6</option>
+                        <option value="Semester 7">Semester 7</option>
+                        <option value="Semester 8">Semester 8</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="examType">
+                        <i class="fas fa-clipboard-check"></i> Exam Type
+                    </label>
+                    <select id="examType" class="form-input">
+                        <option value="">All Types</option>
+                        <option value="regular">Regular</option>
+                        <option value="supply">Supply</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="viewMode">
+                        <i class="fas fa-eye"></i> View Mode
+                    </label>
+                    <select id="viewMode" class="form-input">
+                        <option value="consolidated">Consolidated (Remove Duplicates)</option>
+                        <option value="detailed">Detailed (Show All Records)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" id="searchBtn">
+                        <i class="fas fa-search"></i>
+                        Search
+                    </button>
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" class="btn btn-secondary" onclick="clearSearch()">
+                        <i class="fas fa-times"></i>
+                        Clear
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section">
+            <div class="results-header">
+                <h2 class="results-title" id="resultsTitle">
+                    <i class="fas fa-list"></i> Search Results
+                </h2>
+            </div>
+            
+            <div class="results-content" id="resultsContainer">
+                <!-- Initial Empty State -->
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>Search for Students</h3>
+                    <p>Enter a student ID or use the filters above to search for student results</p>
+                </div>
+                
+                <!-- Loading State -->
+                <div class="loading-state hidden" id="loadingState">
+                    <div class="loading-spinner"></div>
+                    <h3>Searching...</h3>
+                    <p>Please wait while we search for student records</p>
+                </div>
+                
+                <!-- Error State -->
+                <div class="error-state hidden" id="errorState">
+                    <div class="error-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3>Search Failed</h3>
+                    <p id="errorMessage">An error occurred while searching. Please try again.</p>
+                </div>
+                
+                <!-- Results Container -->
+                <div class="hidden" id="studentsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Search functionality
+        document.getElementById('searchForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await searchStudents();
+        });
+
+        // Auto-search when typing student ID (with debounce)
+        let searchTimeout;
+        document.getElementById('studentId').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const studentId = this.value.trim();
+            
+            if (studentId.length >= 8) { // Only search when we have enough characters
+                searchTimeout = setTimeout(() => {
+                    searchStudents();
+                }, 500); // 500ms debounce
+            }
+        });
+
+        async function searchStudents() {
+            const studentId = document.getElementById('studentId').value.trim();
+            const semester = document.getElementById('semester').value;
+            const examType = document.getElementById('examType').value;
+            const viewMode = document.getElementById('viewMode').value;
+            
+            // Validate input
+            if (!studentId && !semester && !examType) {
+                showError('Please enter at least one search criteria');
+                return;
+            }
+            
+            // Show loading state
+            showLoading();
+            
+            try {
+                // Build query parameters
+                const params = new URLSearchParams();
+                if (studentId) params.append('student_id', studentId);
+                if (semester) params.append('semester', semester);
+                if (examType) params.append('exam_type', examType);
+                params.append('limit', '50'); // Limit results
+                
+                // Set deduplication based on view mode
+                if (viewMode === 'consolidated') {
+                    params.append('deduplicate', 'true');
+                } else {
+                    params.append('deduplicate', 'false');
+                }
+                
+                // Make API request
+                const response = await fetch(`/api/students/search?${params}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Search failed');
+                }
+                
+                displayResults(data.results || [], data.search_criteria);
+                
+            } catch (error) {
+                console.error('Search error:', error);
+                showError(error.message || 'Search failed. Please try again.');
+            }
+        }
+
+        function displayResults(students, searchCriteria) {
+            const container = document.getElementById('studentsContainer');
+            const title = document.getElementById('resultsTitle');
+            
+            // Hide loading and error states
+            hideAllStates();
+            
+            if (students.length === 0) {
+                showEmpty('No students found matching your search criteria');
+                return;
+            }
+            
+            // Update title
+            title.innerHTML = `<i class="fas fa-list"></i> Search Results (${students.length} student${students.length > 1 ? 's' : ''} found)`;
+            
+            // Generate results HTML with semester-wise organization
+            container.innerHTML = students.map(student => {
+                const isConsolidated = student.consolidatedRecord;
+                const semesterData = student.semesterData || [];
+                const allSemesters = student.allSemesters || [student.semester];
+                const allExamTypes = student.allExamTypes || [student.examType || student.exam_type || 'Regular'];
+                
+                // Group subjects by semester for semester-wise display
+                const subjectsBySemester = {};
+                if (student.subjectGrades) {
+                    student.subjectGrades.forEach(subject => {
+                        const semester = subject.semester || student.semester || 'Unknown Semester';
+                        if (!subjectsBySemester[semester]) {
+                            subjectsBySemester[semester] = [];
+                        }
+                        subjectsBySemester[semester].push(subject);
+                    });
+                }
+                
+                // Sort semesters for logical display
+                const sortedSemesters = Object.keys(subjectsBySemester).sort((a, b) => {
+                    const getNumber = (sem) => {
+                        const match = sem.match(/\d+/);
+                        return match ? parseInt(match[0]) : 0;
+                    };
+                    return getNumber(a) - getNumber(b);
+                });
+                
+                return `
+                    <div class="student-card">
+                        <div class="student-header">
+                            <div class="student-id">${student.student_id}</div>
+                            <div class="student-info">
+                                <span class="info-badge">${allSemesters.length > 1 ? `${allSemesters.length} Semesters` : (student.semester || 'Unknown Semester')}</span>
+                                <span class="info-badge">${student.university || 'JNTUK'}</span>
+                                ${allExamTypes.map(type => `<span class="info-badge">${type}</span>`).join('')}
+                                ${isConsolidated ? `<span class="consolidated-indicator">Consolidated</span>` : ''}
+                                ${student.consolidatedSGPA ? `<span class="sgpa-badge">Avg SGPA: ${student.consolidatedSGPA}</span>` : 
+                                  (student.sgpa ? `<span class="sgpa-badge">SGPA: ${student.sgpa}</span>` : '')}
+                            </div>
+                        </div>
+                        
+                        ${isConsolidated && semesterData.length > 0 ? `
+                            <div class="academic-progress">
+                                <h4 style="color: var(--primary-800); margin-bottom: 0.75rem;">
+                                    <i class="fas fa-chart-line"></i> Academic Progress (${semesterData.length} semester${semesterData.length > 1 ? 's' : ''})
+                                </h4>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
+                                    ${semesterData.map(sem => `
+                                        <div class="semester-card">
+                                            <strong style="color: var(--primary-800);">${sem.semester}</strong>
+                                            <span style="color: var(--primary-600); font-size: 0.875rem;">(${sem.exam_type})</span><br>
+                                            <span style="color: var(--success-500); font-weight: 600; font-size: 1.1rem;">SGPA: ${sem.sgpa}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${sortedSemesters.length > 0 ? `
+                            <div style="margin-bottom: 1rem;">
+                                <h4 style="color: var(--primary-800); margin-bottom: 0.75rem;">
+                                    <i class="fas fa-book"></i> Semester-wise Subject Details 
+                                    ${isConsolidated ? `(${student.totalSubjects} unique subjects across ${sortedSemesters.length} semester${sortedSemesters.length > 1 ? 's' : ''})` : 
+                                      `(${student.subjectGrades?.length || 0} subjects)`}
+                                </h4>
+                            </div>
+                            
+                            ${sortedSemesters.map(semester => {
+                                const subjects = subjectsBySemester[semester];
+                                const semesterSGPA = semesterData.find(s => s.semester === semester)?.sgpa;
+                                const semesterExamType = semesterData.find(s => s.semester === semester)?.exam_type || subjects[0]?.exam_type || 'Regular';
+                                
+                                return `
+                                    <div class="semester-section" style="margin-bottom: 2rem; border: 2px solid var(--primary-200); border-radius: 12px; overflow: hidden;">
+                                        <div class="semester-header" style="background: linear-gradient(135deg, var(--primary-600), var(--primary-700)); color: white; padding: 1rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                                                <h5 style="margin: 0; font-size: 1.1rem; font-weight: 600;">
+                                                    <i class="fas fa-graduation-cap"></i> ${semester}
+                                                </h5>
+                                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                                    <span style="background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem;">
+                                                        ${semesterExamType}
+                                                    </span>
+                                                    ${semesterSGPA ? `
+                                                        <span style="background: var(--success-500); padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600; font-size: 0.875rem;">
+                                                            SGPA: ${semesterSGPA}
+                                                        </span>
+                                                    ` : ''}
+                                                    <span style="background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem;">
+                                                        ${subjects.length} Subject${subjects.length > 1 ? 's' : ''}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="semester-subjects" style="padding: 1rem;">
+                                            <div class="subjects-grid">
+                                                ${subjects.map(subject => `
+                                                    <div class="subject-card">
+                                                        <div class="subject-header">
+                                                            <span class="subject-code">${subject.code || 'N/A'}</span>
+                                                            <span class="subject-grade grade-${(subject.grade || 'F').charAt(0)}">${subject.grade || 'F'}</span>
+                                                        </div>
+                                                        <div class="subject-name">${subject.subject || subject.code || 'Subject Name'}</div>
+                                                        <div class="subject-details">
+                                                            <span>Credits: ${subject.credits || 0}</span>
+                                                            <span>Internals: ${subject.internals || 0}</span>
+                                                        </div>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        ` : '<p style="color: var(--primary-500); font-style: italic;">No subject grades available</p>'}
+                        
+                        ${isConsolidated ? `
+                            <div class="consolidation-info">
+                                <i class="fas fa-info-circle"></i> 
+                                <strong>Consolidated Record:</strong> Combined data from ${student.recordCount} database records. 
+                                Total Credits: ${student.totalCredits || 0} • Last Updated: ${student.lastUpdated || 'Unknown'}
+                            </div>
+                        ` : ''}
+                        
+                        ${student.duplicatesRemoved > 0 ? `
+                            <div class="duplicates-removed">
+                                <i class="fas fa-layer-group"></i> 
+                                <strong>Duplicates Removed:</strong> ${student.duplicatesRemoved} duplicate record${student.duplicatesRemoved > 1 ? 's' : ''} hidden to show clean results.
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            // Show results
+            container.classList.remove('hidden');
+        }
+
+        function showLoading() {
+            hideAllStates();
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('searchBtn').disabled = true;
+            document.getElementById('searchBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+        }
+
+        function showError(message) {
+            hideAllStates();
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorState').classList.remove('hidden');
+            resetSearchButton();
+        }
+
+        function showEmpty(message) {
+            hideAllStates();
+            document.getElementById('emptyState').innerHTML = `
+                <div class="empty-icon">
+                    <i class="fas fa-user-slash"></i>
+                </div>
+                <h3>No Results Found</h3>
+                <p>${message}</p>
+            `;
+            document.getElementById('emptyState').classList.remove('hidden');
+            resetSearchButton();
+        }
+
+        function hideAllStates() {
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('errorState').classList.add('hidden');
+            document.getElementById('studentsContainer').classList.add('hidden');
+        }
+
+        function resetSearchButton() {
+            document.getElementById('searchBtn').disabled = false;
+            document.getElementById('searchBtn').innerHTML = '<i class="fas fa-search"></i> Search';
+        }
+
+        function clearSearch() {
+            // Clear form
+            document.getElementById('searchForm').reset();
+            
+            // Reset view mode to consolidated (default)
+            document.getElementById('viewMode').value = 'consolidated';
+            
+            // Reset results
+            hideAllStates();
+            document.getElementById('emptyState').innerHTML = `
+                <div class="empty-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>Search for Students</h3>
+                <p>Enter a student ID or use the filters above to search for student results</p>
+            `;
+            document.getElementById('emptyState').classList.remove('hidden');
+            
+            // Reset title
+            document.getElementById('resultsTitle').innerHTML = '<i class="fas fa-list"></i> Search Results';
+            
+            // Focus on student ID input
+            document.getElementById('studentId').focus();
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Clear session and redirect
+                fetch('/admin?force=true', { method: 'GET' })
+                    .then(() => {
+                        window.location.href = '/admin?force=true';
+                    })
+                    .catch(() => {
+                        window.location.href = '/admin?force=true';
+                    });
+            }
+        }
+
+        // Auto-focus on student ID field when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('studentId').focus();
+            
+            // Add some sample placeholder animations
+            const studentIdInput = document.getElementById('studentId');
+            const placeholders = [
+                'Enter student ID (e.g., 20B91A0501)',
+                'Try: 17B81A0502',
+                'Search by student ID...'
+            ];
+            
+            let placeholderIndex = 0;
+            setInterval(() => {
+                if (!studentIdInput.value) {
+                    studentIdInput.placeholder = placeholders[placeholderIndex];
+                    placeholderIndex = (placeholderIndex + 1) % placeholders.length;
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
