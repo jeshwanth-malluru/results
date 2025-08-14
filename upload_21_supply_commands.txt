@@ -1,0 +1,47 @@
+# 2-1 Supply PDF Upload Commands
+# Choose one of the methods below:
+
+# ==============================================================================
+# METHOD 1: Python Script (Recommended - shows detailed progress)
+# ==============================================================================
+# Run this in PowerShell:
+python upload_21_supply.py
+
+# ==============================================================================
+# METHOD 2: PowerShell with curl (Direct upload)
+# ==============================================================================
+curl.exe -X POST `
+  -H "X-API-Key: my-very-secret-admin-api-key" `
+  -F "pdf=@c:\Users\jeshw_3agky5x\Downloads\Results of II B.Tech I Semester (R23R20R19R16) Supplementary Examinations, May-2025.pdf" `
+  -F "format=jntuk" `
+  https://student-result-backend-390507264435.us-central1.run.app/upload-supply-pdf
+
+# ==============================================================================
+# METHOD 3: Windows Command Prompt
+# ==============================================================================
+# Run this in Command Prompt:
+curl -X POST ^
+  -H "X-API-Key: my-very-secret-admin-api-key" ^
+  -F "pdf=@c:\Users\jeshw_3agky5x\Downloads\Results of II B.Tech I Semester (R23R20R19R16) Supplementary Examinations, May-2025.pdf" ^
+  -F "format=jntuk" ^
+  https://student-result-backend-390507264435.us-central1.run.app/upload-supply-pdf
+
+# ==============================================================================
+# WHAT THIS WILL DO:
+# ==============================================================================
+# ✅ Parse your 2-1 supply PDF
+# ✅ Find existing 2-1 regular results in Firebase
+# ✅ Match students by HTNO (student ID)
+# ✅ Compare grades by subject code
+# ✅ Replace F grades with better supply grades (F→D, F→C, etc.)
+# ✅ Keep original grades if supply grade is worse
+# ✅ Track attempt counts (attempt #2 for supply subjects)
+# ✅ Generate detailed improvement report
+# ✅ Store PDF in cloud storage
+
+# EXPECTED OUTPUT:
+# - Total students processed: XX
+# - F→Better grade improvements: XX
+# - Grades improved: XX
+# - Processing time: X.XX seconds
+# - Detailed improvement statistics

@@ -1,0 +1,17 @@
+{
+  "metadata": {
+    "processed_at": "2025-08-13T23:02:31.748662",
+    "supply_pdf": "c:\\temp\\supply_21.pdf",
+    "regular_source": "data\\parsed_results_jntuk_regular_20250813_223510.json",
+    "processing_type": "local_supply_merge"
+  },
+  "statistics": {
+    "students_processed": 951,
+    "students_updated": 0,
+    "grades_improved": 0,
+    "f_grade_improvements": 0,
+    "new_subjects_added": 0,
+    "details": []
+  },
+  "updated_students": []
+}

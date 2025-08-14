@@ -113,12 +113,154 @@ def find_existing_student_record(db, student_id, year, semester):
         print(f"⚠️ Error finding existing record for {student_id}: {e}")
         return None, None
 
+def smart_supply_merge_by_subject(existing_subjects, supply_subjects, supply_timestamp):
+    """
+    Smart merge logic for supply results with existing regular results:
+    1. Find student by register number
+    2. Check each subject code in supply results
+    3. If student failed in regular but passed in supply - OVERWRITE grade
+    4. Track attempt count alongside the grade
+    5. Preserve original regular results for already passed subjects
+    """
+    merged_subjects = existing_subjects.copy()
+    merge_report = {
+        'subjects_overwritten': 0,
+        'subjects_added': 0,
+        'attempts_tracked': 0,
+        'improvements_detected': [],
+        'actions': []
+    }
+    
+    for subject_code, supply_subject in supply_subjects.items():
+        supply_grade = supply_subject.get('grade', 'F')
+        supply_result = supply_subject.get('result', 'Fail')
+        
+        if subject_code in existing_subjects:
+            existing_subject = existing_subjects[subject_code]
+            existing_grade = existing_subject.get('grade', 'F')
+            existing_result = existing_subject.get('result', 'Fail')
+            current_attempts = existing_subject.get('attempts', 1)
+            
+            # Check if student failed in regular but passed in supply
+            regular_failed = existing_result.lower() in ['fail', 'f'] or existing_grade == 'F'
+            supply_passed = supply_result.lower() in ['pass', 'p'] and supply_grade != 'F'
+            supply_improved = is_grade_improvement(existing_grade, supply_grade)
+            
+            if regular_failed and supply_passed:
+                # OVERWRITE: Student failed in regular but passed in supply
+                merged_subjects[subject_code] = {
+                    **supply_subject,
+                    'attempts': current_attempts + 1,
+                    'exam_type': 'SUPPLY',
+                    'original_grade': existing_grade,
+                    'original_result': existing_result,
+                    'improved_from_regular': True,
+                    'improvement_date': supply_timestamp,
+                    'attempt_history': existing_subject.get('attempt_history', []) + [{
+                        'attempt': current_attempts + 1,
+                        'exam_type': 'SUPPLY',
+                        'grade': supply_grade,
+                        'result': supply_result,
+                        'timestamp': supply_timestamp,
+                        'improvement': True,
+                        'previous_grade': existing_grade
+                    }]
+                }
+                
+                merge_report['subjects_overwritten'] += 1
+                merge_report['improvements_detected'].append({
+                    'subject_code': subject_code,
+                    'from_grade': existing_grade,
+                    'to_grade': supply_grade,
+                    'attempt_number': current_attempts + 1
+                })
+                merge_report['actions'].append(f"✅ {subject_code}: Overwritten {existing_grade}→{supply_grade} (Attempt #{current_attempts + 1})")
+                
+            elif supply_improved:
+                # OVERWRITE: Supply grade is better than existing grade
+                merged_subjects[subject_code] = {
+                    **supply_subject,
+                    'attempts': current_attempts + 1,
+                    'exam_type': 'SUPPLY',
+                    'original_grade': existing_grade,
+                    'original_result': existing_result,
+                    'improved_grade': True,
+                    'improvement_date': supply_timestamp,
+                    'attempt_history': existing_subject.get('attempt_history', []) + [{
+                        'attempt': current_attempts + 1,
+                        'exam_type': 'SUPPLY',
+                        'grade': supply_grade,
+                        'result': supply_result,
+                        'timestamp': supply_timestamp,
+                        'improvement': True,
+                        'previous_grade': existing_grade
+                    }]
+                }
+                
+                merge_report['subjects_overwritten'] += 1
+                merge_report['improvements_detected'].append({
+                    'subject_code': subject_code,
+                    'from_grade': existing_grade,
+                    'to_grade': supply_grade,
+                    'attempt_number': current_attempts + 1
+                })
+                merge_report['actions'].append(f"📈 {subject_code}: Improved {existing_grade}→{supply_grade} (Attempt #{current_attempts + 1})")
+                
+            else:
+                # TRACK ONLY: No improvement, just track the attempt
+                merged_subjects[subject_code]['attempts'] = current_attempts + 1
+                merged_subjects[subject_code]['last_supply_attempt'] = supply_timestamp
+                attempt_history = merged_subjects[subject_code].get('attempt_history', [])
+                attempt_history.append({
+                    'attempt': current_attempts + 1,
+                    'exam_type': 'SUPPLY',
+                    'grade': supply_grade,
+                    'result': supply_result,
+                    'timestamp': supply_timestamp,
+                    'improvement': False,
+                    'note': 'Supply attempt recorded, no grade improvement'
+                })
+                merged_subjects[subject_code]['attempt_history'] = attempt_history
+                merge_report['actions'].append(f"📝 {subject_code}: Tracked attempt #{current_attempts + 1} (Grade: {supply_grade}, no improvement)")
+            
+            merge_report['attempts_tracked'] += 1
+            
+        else:
+            # NEW SUBJECT: Add supply subject as new
+            merged_subjects[subject_code] = {
+                **supply_subject,
+                'attempts': 1,
+                'exam_type': 'SUPPLY',
+                'new_subject_from_supply': True,
+                'added_date': supply_timestamp,
+                'attempt_history': [{
+                    'attempt': 1,
+                    'exam_type': 'SUPPLY',
+                    'grade': supply_grade,
+                    'result': supply_result,
+                    'timestamp': supply_timestamp,
+                    'note': 'New subject added from supply'
+                }]
+            }
+            
+            merge_report['subjects_added'] += 1
+            merge_report['actions'].append(f"➕ {subject_code}: Added new subject (Grade: {supply_grade}, Attempt #1)")
+    
+    return merged_subjects, merge_report
+
 def merge_student_subjects(existing_record, new_student, current_exam_type, upload_timestamp):
-    """Intelligently merge student subjects based on priority rules"""
+    """
+    Intelligently merge student subjects with targeted supply result logic:
+    - When supply results are processed: overwrite regular failures with supply passes
+    - Track attempt count alongside grades
+    - Preserve regular passes (don't overwrite unless supply grade is better)
+    """
     merge_stats = {
         'subjects_updated': 0,
         'subjects_added': 0,
         'subjects_kept': 0,
+        'supply_overwrites': 0,
+        'attempt_tracking': 0,
         'merge_actions': []
     }
     
@@ -130,79 +272,185 @@ def merge_student_subjects(existing_record, new_student, current_exam_type, uplo
             if subject_code:
                 existing_subjects[subject_code] = subject
     
-    # Start with existing subjects
-    merged_subjects = existing_subjects.copy()
-    
-    # Process each subject from new PDF
-    new_subjects = new_student.get('subjects', [])
-    for new_subject in new_subjects:
+    # Prepare new subjects as dictionary
+    new_subjects_dict = {}
+    for new_subject in new_student.get('subjects', []):
         subject_code = new_subject.get('subject_code')
-        if not subject_code:
-            continue
-            
-        existing_subject = existing_subjects.get(subject_code)
+        if subject_code:
+            new_subjects_dict[subject_code] = new_subject
+    
+    # Use smart supply merge if this is a supply upload
+    if current_exam_type == 'supplementary' or current_exam_type == 'supply':
+        merged_subjects_dict, merge_report = smart_supply_merge_by_subject(
+            existing_subjects, 
+            new_subjects_dict, 
+            upload_timestamp
+        )
         
-        if existing_subject:
-            # Subject exists - apply priority rules
-            should_update = should_update_subject(
-                existing_subject, 
-                new_subject, 
-                existing_record.get('examType', 'regular'),
-                current_exam_type,
-                existing_record.get('uploadedAt', ''),
-                upload_timestamp
-            )
-            
-            if should_update:
-                # Update subject with new data
+        # Convert back to list format for compatibility
+        merged_subjects_list = list(merged_subjects_dict.values())
+        
+        # Update merge stats
+        merge_stats['subjects_updated'] = merge_report['subjects_overwritten']
+        merge_stats['subjects_added'] = merge_report['subjects_added']
+        merge_stats['supply_overwrites'] = merge_report['subjects_overwritten']
+        merge_stats['attempt_tracking'] = merge_report['attempts_tracked']
+        merge_stats['merge_actions'] = merge_report['actions']
+        
+        # Log the merge actions
+        student_id = new_student.get('student_id', 'Unknown')
+        logger.info(f"🔄 Supply merge for {student_id}: {merge_report['subjects_overwritten']} overwritten, {merge_report['subjects_added']} added, {merge_report['attempts_tracked']} attempts tracked")
+        
+        for action in merge_report['actions']:
+            logger.info(f"   {action}")
+        
+    else:
+        # Regular merge logic for non-supply uploads
+        merged_subjects_list = list(existing_subjects.values())
+        
+        for subject_code, new_subject in new_subjects_dict.items():
+            if subject_code in existing_subjects:
+                # Update existing subject with regular logic
+                existing_subject = existing_subjects[subject_code]
+                current_attempts = existing_subject.get('attempts', 1)
+                
+                # Update the subject
                 updated_subject = new_subject.copy()
-                updated_subject['source'] = current_exam_type
-                updated_subject['updated_at'] = upload_timestamp
-                merged_subjects[subject_code] = updated_subject
+                updated_subject['attempts'] = current_attempts + 1
+                updated_subject['last_updated'] = upload_timestamp
+                
+                # Replace in list
+                for i, subj in enumerate(merged_subjects_list):
+                    if subj.get('subject_code') == subject_code:
+                        merged_subjects_list[i] = updated_subject
+                        break
                 
                 merge_stats['subjects_updated'] += 1
-                merge_stats['merge_actions'].append({
-                    'type': 'UPDATE',
-                    'subject_code': subject_code,
-                    'old_result': f"{existing_subject.get('result', 'Unknown')} (Grade: {existing_subject.get('grade', 'N/A')})",
-                    'new_result': f"{new_subject.get('result', 'Unknown')} (Grade: {new_subject.get('grade', 'N/A')})",
-                    'reason': get_update_reason(existing_record.get('examType', 'regular'), current_exam_type, upload_timestamp)
-                })
+                merge_stats['merge_actions'].append(f"🔄 {subject_code}: Updated (Attempt #{updated_subject['attempts']})")
+                
             else:
-                # Keep existing subject
-                merge_stats['subjects_kept'] += 1
+                # Add new subject
+                new_subject['attempts'] = 1
+                new_subject['added_at'] = upload_timestamp
+                merged_subjects_list.append(new_subject)
+                merge_stats['subjects_added'] += 1
+                merge_stats['merge_actions'].append(f"➕ {subject_code}: Added new subject")
+    
+    # Create updated student record
+    updated_student = new_student.copy()
+    updated_student['subjects'] = merged_subjects_list
+    updated_student['last_updated'] = upload_timestamp
+    updated_student['merge_stats'] = merge_stats
+    
+    return updated_student, merge_stats
+
+def should_update_subject_with_attempts(existing_subject, new_subject, existing_exam_type, new_exam_type, existing_upload_time, new_upload_time):
+    """Enhanced subject update logic with supply-specific prioritization and attempt tracking"""
+    # Get grades for comparison
+    existing_grade = existing_subject.get('grade', 'F')
+    new_grade = new_subject.get('grade', 'F')
+    
+    # Supply results should update if grade improves
+    if new_exam_type == 'supplementary':
+        if is_grade_improvement(existing_grade, new_grade):
+            return True, f"Supply grade improvement: {existing_grade} → {new_grade}"
         else:
-            # New subject - add it
-            new_subject_copy = new_subject.copy()
-            new_subject_copy['source'] = current_exam_type
-            new_subject_copy['updated_at'] = upload_timestamp
-            merged_subjects[subject_code] = new_subject_copy
-            
-            merge_stats['subjects_added'] += 1
-            merge_stats['merge_actions'].append({
-                'type': 'ADD',
-                'subject_code': subject_code,
-                'new_result': f"{new_subject.get('result', 'Unknown')} (Grade: {new_subject.get('grade', 'N/A')})",
-                'reason': 'New subject not in existing record'
-            })
+            # Still track the attempt even if no improvement
+            return False, f"Supply attempt tracked: {new_grade} (no improvement from {existing_grade})"
     
-    # Convert back to list format
-    final_subjects = list(merged_subjects.values())
+    # Regular exam type logic
+    if existing_exam_type == 'supplementary' and new_exam_type == 'regular':
+        return False, "Regular result cannot overwrite supply result"
     
-    return final_subjects, merge_stats
+    # For same exam type, update if newer or grade improves
+    if new_exam_type == existing_exam_type:
+        if is_grade_improvement(existing_grade, new_grade):
+            return True, f"Grade improvement within same exam type: {existing_grade} → {new_grade}"
+        return False, f"No grade improvement in same exam type: {existing_grade} vs {new_grade}"
+    
+    return False, "No update needed"
+
+def process_supply_update(existing_subject, new_subject, current_exam_type, upload_timestamp):
+    updated_subject['updated_at'] = upload_timestamp
+    updated_subject['last_attempt_at'] = upload_timestamp
+    
+    # Preserve and extend attempt history
+    attempt_history = existing_subject.get('attempt_history', [])
+    
+    # Add new attempt to history
+    new_attempt = {
+        'attempt_number': updated_subject['attempts'],
+        'exam_type': current_exam_type,
+        'grade': new_subject.get('grade', 'F'),
+        'result': new_subject.get('result', 'Fail'),
+        'attempted_at': upload_timestamp,
+        'previous_grade': existing_subject.get('grade', 'F'),
+        'previous_result': existing_subject.get('result', 'Fail'),
+        'improvement': is_grade_improvement(existing_subject.get('grade', 'F'), new_subject.get('grade', 'F')),
+        'reason': f"Supply exam attempt #{updated_subject['attempts']}"
+    }
+    
+    attempt_history.append(new_attempt)
+    updated_subject['attempt_history'] = attempt_history
+    
+    # Add additional metadata
+    updated_subject['has_supply_attempts'] = True
+    updated_subject['total_supply_attempts'] = sum(1 for attempt in attempt_history if attempt.get('exam_type') == 'supplementary')
+    updated_subject['grade_improved'] = new_attempt['improvement']
+    
+    return updated_subject
+
+def is_grade_improvement(old_grade, new_grade):
+    """Check if new grade is better than old grade"""
+    grade_hierarchy = ['O', 'A+', 'A', 'B+', 'B', 'C', 'D', 'F', 'Ab', 'MP']
+    
+    try:
+        old_index = grade_hierarchy.index(old_grade) if old_grade in grade_hierarchy else len(grade_hierarchy)
+        new_index = grade_hierarchy.index(new_grade) if new_grade in grade_hierarchy else len(grade_hierarchy)
+        return new_index < old_index  # Lower index = better grade
+    except:
+        return False
+
+def should_update_subject_with_attempts(existing_subject, new_subject, existing_exam_type, new_exam_type, existing_timestamp, new_timestamp):
+    """Enhanced logic for supply results with attempt tracking"""
+    
+    # Rule 1: Supply results with grade improvement always overwrite
+    if new_exam_type == 'supplementary':
+        existing_grade = existing_subject.get('grade', 'F')
+        new_grade = new_subject.get('grade', 'F')
+        
+        # Check if grade improved
+        if is_grade_improvement(existing_grade, new_grade):
+            return True, f"Supply grade improved: {existing_grade} → {new_grade}"
+        
+        # Even if grade didn't improve, if student passed in supply and failed in regular
+        existing_result = existing_subject.get('result', 'Fail').lower()
+        new_result = new_subject.get('result', 'Fail').lower()
+        
+        if 'fail' in existing_result and 'pass' in new_result:
+            return True, f"Supply result improved: Failed → Passed (Grade: {new_grade})"
+        
+        # If supply grade is same or better, still update to track attempts
+        if new_grade != existing_grade:
+            return True, f"Supply attempt recorded: {existing_grade} → {new_grade}"
+    
+    # Rule 2: Regular results only overwrite if newer
+    if new_exam_type == 'regular' and existing_exam_type == 'supplementary':
+        # Only overwrite supply with regular if significantly newer
+        return False, "Supply results take priority over regular results"
+    
+    # Rule 3: Newer uploads of same type
+    if new_timestamp > existing_timestamp and new_exam_type == existing_exam_type:
+        return True, f"Newer {new_exam_type} upload"
+    
+    return False, "No update needed"
 
 def should_update_subject(existing_subject, new_subject, existing_exam_type, new_exam_type, existing_timestamp, new_timestamp):
-    """Determine if a subject should be updated based on priority rules"""
-    # Rule 1: SUPPLY always overwrites REGULAR
-    if new_exam_type == 'supplementary' and existing_exam_type == 'regular':
-        return True
-    
-    # Rule 2: Newer uploads always win (timestamp priority)
-    if new_timestamp > existing_timestamp:
-        return True
-    
-    # Rule 3: Same exam type, same timestamp - keep existing (no update needed)
-    return False
+    """Legacy function - redirects to enhanced version"""
+    should_update, reason = should_update_subject_with_attempts(
+        existing_subject, new_subject, existing_exam_type, new_exam_type, existing_timestamp, new_timestamp
+    )
+    return should_update
 
 def get_update_reason(existing_exam_type, new_exam_type, timestamp):
     """Get human-readable reason for the update"""
@@ -248,10 +496,11 @@ def smart_batch_upload_to_firebase(batch_records, year, semesters, exam_types, f
                 )
                 
                 if existing_record:
-                    # Step 2: Smart merge with existing record
-                    print(f"🔄 Merging {student_id} - {detected_semester} (existing record found)")
+                    # Step 2: Smart merge with existing record (Supply Logic)
+                    existing_exam_type = existing_record.get('examType', 'regular')
+                    print(f"🔄 Merging {student_id} - {detected_semester} (existing: {existing_exam_type} → new: {current_exam_type})")
                     
-                    # Merge subjects intelligently
+                    # Merge subjects intelligently with supply logic
                     merged_subjects, merge_stats = merge_student_subjects(
                         existing_record, student, current_exam_type, upload_timestamp
                     )
@@ -264,11 +513,13 @@ def smart_batch_upload_to_firebase(batch_records, year, semesters, exam_types, f
                         'lastUpdatedAt': upload_timestamp,
                         'lastUploadId': doc_id,
                         'totalSubjects': len(merged_subjects),
+                        'hasSupplyAttempts': current_exam_type == 'supplementary' or existing_record.get('hasSupplyAttempts', False),
                         'mergeHistory': existing_record.get('mergeHistory', []) + [{
                             'uploadedAt': upload_timestamp,
                             'examType': current_exam_type,
                             'subjectsUpdated': merge_stats['subjects_updated'],
-                            'subjectsAdded': merge_stats['subjects_added']
+                            'subjectsAdded': merge_stats['subjects_added'],
+                            'supplyOverwrites': merge_stats.get('supply_overwrites', 0)
                         }]
                     })
                     
@@ -276,14 +527,22 @@ def smart_batch_upload_to_firebase(batch_records, year, semesters, exam_types, f
                     existing_doc_ref.update(updated_student_data)
                     students_updated += 1
                     
-                    # Log merge actions
+                    # Enhanced logging for supply processing
+                    supply_updates = 0
                     for action in merge_stats['merge_actions']:
-                        if action['type'] == 'UPDATE':
+                        if action['type'] == 'SUPPLY_UPDATE':
+                            supply_updates += 1
+                            print(f"   🎯 SUPPLY OVERWRITE {action['subject_code']}: {action['old_result']} → {action['new_result']} [Attempt #{action['attempts']}]")
+                        elif action['type'] == 'UPDATE':
                             print(f"   🔄 UPDATE {action['subject_code']}: {action['old_result']} → {action['new_result']}")
                         elif action['type'] == 'ADD':
                             print(f"   ➕ ADD {action['subject_code']}: {action['new_result']}")
                     
-                    print(f"   📊 Merge summary: {merge_stats['subjects_updated']} updated, {merge_stats['subjects_added']} added, {merge_stats['subjects_kept']} kept")
+                    # Supply-specific summary
+                    if current_exam_type == 'supplementary':
+                        print(f"   🎓 SUPPLY SUMMARY: {supply_updates} subjects overwritten, {merge_stats['subjects_updated']} total updates")
+                    else:
+                        print(f"   📊 Merge summary: {merge_stats['subjects_updated']} updated, {merge_stats['subjects_added']} added, {merge_stats['subjects_kept']} kept")
                     
                 else:
                     # Step 3: Create new record (no existing record found)
@@ -921,6 +1180,280 @@ def process_single_pdf(pdf_path, db, bucket, batch_size=DEFAULT_BATCH_SIZE):
             'total_students': total_students,
             'processing_time': time.time() - start_time
         }
+
+def process_supply_pdf_with_smart_merge(pdf_path, format_type='jntuk', original_filename=None):
+    """
+    Specialized function for processing supply PDFs with intelligent grade overwriting:
+    
+    1. Parse supply PDF to extract student results
+    2. For each student, detect register number
+    3. Search Firebase for existing regular results by register number
+    4. Match subjects by subject code
+    5. Overwrite grades when supply result is better (especially F→Pass)
+    6. Track attempt count alongside each grade
+    7. Preserve attempt history with detailed logging
+    
+    Args:
+        pdf_path: Path to the supply PDF file
+        format_type: PDF format ("jntuk" or "autonomous") 
+        original_filename: Original filename for logging
+    
+    Returns:
+        Dict with processing results including supply-specific statistics
+    """
+    print(f"\n🎯 SUPPLY PDF SMART PROCESSING STARTED")
+    print(f"📄 PDF: {original_filename or os.path.basename(pdf_path)}")
+    print(f"📋 Format: {format_type.upper()}")
+    print("=" * 60)
+    
+    start_time = time.time()
+    
+    try:
+        # Initialize Firebase
+        db = firestore.client()
+        
+        # Parse the supply PDF
+        print(f"� Parsing supply PDF...")
+        if format_type.lower() == 'autonomous':
+            from parser.parser_autonomous import parse_autonomous_pdf
+            parsed_results = parse_autonomous_pdf(pdf_path)
+        else:
+            from parser.parser_jntuk import parse_jntuk_pdf  
+            parsed_results = parse_jntuk_pdf(pdf_path)
+        
+        if not parsed_results:
+            return {
+                'status': 'error',
+                'message': 'No valid student results found in supply PDF',
+                'stats': {'total_processed': 0}
+            }
+        
+        print(f"✅ Parsed {len(parsed_results)} students from supply PDF")
+        
+        # Initialize tracking variables
+        supply_stats = {
+            'total_processed': len(parsed_results),
+            'students_found_in_firebase': 0,
+            'students_not_found': 0,
+            'students_updated': 0,
+            'subjects_overwritten': 0,
+            'subjects_added': 0,
+            'total_attempts_tracked': 0,
+            'grade_improvements': []
+        }
+        
+        supply_timestamp = datetime.now().isoformat()
+        
+        # Process each student from supply PDF
+        for i, supply_student in enumerate(parsed_results, 1):
+            student_id = supply_student.get('student_id')
+            print(f"\n🔍 Processing student {i}/{len(parsed_results)}: {student_id}")
+            
+            # Search for existing student record in Firebase
+            existing_doc = None
+            existing_data = None
+            
+            # Query Firebase for any document containing this student_id
+            try:
+                # Search across all collections/documents for this student
+                query = db.collection('students').where('student_id', '==', student_id).limit(1)
+                docs = query.stream()
+                
+                for doc in docs:
+                    existing_doc = doc
+                    existing_data = doc.to_dict()
+                    break
+                
+                if not existing_doc:
+                    # Try alternative search patterns
+                    all_docs = db.collection('students').stream()
+                    for doc in all_docs:
+                        doc_data = doc.to_dict()
+                        if doc_data.get('student_id') == student_id:
+                            existing_doc = doc
+                            existing_data = doc_data
+                            break
+                            
+            except Exception as e:
+                print(f"⚠️ Error searching for student {student_id}: {e}")
+                continue
+            
+            if existing_data:
+                print(f"✅ Found existing record for {student_id}")
+                supply_stats['students_found_in_firebase'] += 1
+                
+                # Perform smart supply merge
+                updated_student, merge_stats = merge_student_subjects(
+                    existing_data, 
+                    supply_student, 
+                    'supplementary',
+                    supply_timestamp
+                )
+                
+                # Update Firebase with merged data
+                try:
+                    existing_doc.reference.set(updated_student, merge=True)
+                    supply_stats['students_updated'] += 1
+                    supply_stats['subjects_overwritten'] += merge_stats.get('supply_overwrites', 0)
+                    supply_stats['total_attempts_tracked'] += merge_stats.get('attempt_tracking', 0)
+                    
+                    print(f"💾 Updated Firebase record for {student_id}")
+                    for action in merge_stats.get('merge_actions', []):
+                        print(f"   {action}")
+                        
+                except Exception as e:
+                    print(f"❌ Error updating Firebase for {student_id}: {e}")
+                    
+            else:
+                print(f"❌ No existing record found for {student_id}")
+                supply_stats['students_not_found'] += 1
+                
+                # Optionally create new record for students not found
+                try:
+                    new_student = supply_student.copy()
+                    new_student['exam_type'] = 'SUPPLY'
+                    new_student['created_from_supply'] = True
+                    new_student['created_at'] = supply_timestamp
+                    
+                    # Add attempt info to subjects
+                    for subject in new_student.get('subjects', []):
+                        subject['attempts'] = 1
+                        subject['exam_type'] = 'SUPPLY'
+                        subject['attempt_history'] = [{
+                            'attempt': 1,
+                            'exam_type': 'SUPPLY',
+                            'grade': subject.get('grade', 'F'),
+                            'result': subject.get('result', 'Fail'),
+                            'timestamp': supply_timestamp,
+                            'note': 'New student record created from supply'
+                        }]
+                    
+                    # Create new document
+                    doc_id = f"{student_id}_supply_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                    db.collection('students').document(doc_id).set(new_student)
+                    
+                    supply_stats['subjects_added'] += len(new_student.get('subjects', []))
+                    print(f"➕ Created new record for {student_id} from supply results")
+                    
+                except Exception as e:
+                    print(f"❌ Error creating new record for {student_id}: {e}")
+        
+        processing_time = time.time() - start_time
+        
+        print(f"\n🎉 SUPPLY PROCESSING COMPLETED")
+        print(f"⏱️ Total time: {processing_time:.2f} seconds")
+        print(f"📊 Students processed: {supply_stats['total_processed']}")
+        print(f"✅ Students found & updated: {supply_stats['students_updated']}")
+        print(f"📈 Subjects overwritten: {supply_stats['subjects_overwritten']}")
+        print(f"🔢 Total attempts tracked: {supply_stats['total_attempts_tracked']}")
+        print("=" * 60)
+        
+        return {
+            'status': 'success',
+            'message': f'Supply PDF processed successfully. {supply_stats["students_updated"]} students updated.',
+            'stats': supply_stats,
+            'processing_time': processing_time,
+            'improvement_report': {
+                'total_improvements': supply_stats['subjects_overwritten'],
+                'students_with_improvements': supply_stats['students_updated']
+            }
+        }
+        
+    except Exception as e:
+        error_msg = f"Error processing supply PDF: {str(e)}"
+        print(f"❌ {error_msg}")
+        logger.error(f"{error_msg}\n{traceback.format_exc()}")
+        return {
+            'status': 'error',
+            'message': error_msg,
+            'stats': {'total_processed': 0},
+            'processing_time': time.time() - start_time
+        }
+
+def get_supply_improvement_report(student_id, year, semester):
+    """
+    Generate a report showing supply improvements for a specific student
+    
+    Args:
+        student_id: Student ID to analyze
+        year: Academic year
+        semester: Semester to check
+    
+    Returns:
+        Dict with improvement analysis
+    """
+    try:
+        db = firestore.client()
+        
+        # Find student record
+        doc_ref, student_data = find_existing_student_record(db, student_id, year, semester)
+        
+        if not student_data:
+            return {'error': f'No record found for {student_id}'}
+        
+        improvements = []
+        supply_attempts = 0
+        total_subjects = 0
+        
+        for subject in student_data.get('subjects', []):
+            total_subjects += 1
+            subject_code = subject.get('subject_code', 'Unknown')
+            attempts = subject.get('attempts', 1)
+            
+            if attempts > 1:
+                supply_attempts += 1
+                attempt_history = subject.get('attempt_history', [])
+                
+                if len(attempt_history) > 1:
+                    first_attempt = attempt_history[0]
+                    latest_attempt = attempt_history[-1]
+                    
+                    improvement = {
+                        'subject_code': subject_code,
+                        'subject_name': subject.get('subject_name', 'Unknown'),
+                        'attempts': attempts,
+                        'first_grade': first_attempt.get('grade', 'F'),
+                        'current_grade': latest_attempt.get('grade', 'F'),
+                        'improved': latest_attempt.get('improvement', False),
+                        'attempt_history': attempt_history
+                    }
+                    improvements.append(improvement)
+        
+        return {
+            'student_id': student_id,
+            'year': year,
+            'semester': semester,
+            'total_subjects': total_subjects,
+            'subjects_with_supply_attempts': supply_attempts,
+            'improvements': improvements,
+            'has_supply_attempts': student_data.get('hasSupplyAttempts', False),
+            'last_updated': student_data.get('lastUpdatedAt', 'Unknown')
+        }
+        
+    except Exception as e:
+        return {'error': f'Error generating report: {str(e)}'}
+
+# Example usage function for testing
+def test_supply_processing():
+    """Test function to demonstrate supply processing"""
+    print("🧪 Testing Supply Processing Logic")
+    
+    # Example: Process a supply PDF
+    # result = process_supply_pdf_with_smart_merge(
+    #     pdf_path="path/to/supply_results.pdf",
+    #     year="2nd Year",
+    #     semesters=["Semester 1"],
+    #     format_type="jntuk"
+    # )
+    
+    # Example: Get improvement report
+    # report = get_supply_improvement_report("20B91A0501", "2nd Year", "Semester 1")
+    # print(f"Report: {report}")
+    
+    print("✅ Supply processing functions ready to use!")
+
+if __name__ == "__main__":
+    test_supply_processing()
 
 def main(batch_size=DEFAULT_BATCH_SIZE):
     """Main batch processing function with configurable batch size"""
