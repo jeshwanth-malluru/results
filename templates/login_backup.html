@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Login | Sir C.R. Reddy College</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+      
+      // Disable form and show loading state
+      submitButton.disabled = true;
+      loginForm.classList.add('loading');
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      // Check if Firebase is properly initialized
+      if (window.firebaseError) {
+        showLoginMessage('❌ Firebase Error: ' + window.firebaseError, 'error');
+        submitButton.disabled = false;
+        loginForm.classList.remove('loading');
+        return;
+      }
+      
+      if (typeof firebase === 'undefined' || typeof auth === 'undefined') {
+        showLoginMessage('❌ Firebase not loaded. Please refresh the page.', 'error');
+        submitButton.disabled = false;
+        loginForm.classList.remove('loading');
+        return;
+      }
+      
+      try {
+        // Sign in with Firebase Authentication
+        showLoginMessage('🔐 Authenticating with Firebase...', 'success');
+        
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  
+  <!-- Initialize Firebase -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "{{ firebase_config.apiKey }}",
+      authDomain: "{{ firebase_config.authDomain }}",
+      projectId: "{{ firebase_config.projectId }}",
+      storageBucket: "{{ firebase_config.storageBucket }}",
+      messagingSenderId: "{{ firebase_config.messagingSenderId }}",
+      appId: "{{ firebase_config.appId }}"
+    };
+    
+    // Initialize Firebase
+    try {
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      console.log('✅ Firebase initialized successfully');
+      console.log('Auth Domain:', firebaseConfig.authDomain);
+    } catch (error) {
+      console.error('❌ Firebase initialization failed:', error);
+      // Fallback - show error to user
+      window.firebaseError = error.message;
+    }
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      margin-top: 60px;
+      background: white;
+      padding: 30px 40px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    h2, h3 {
+      margin-top: 0;
+    }
+    .loading {
+      position: relative;
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    .loading::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.8) url('data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==') center center no-repeat;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px;
+      width: 100%;
+      background-color: #003366;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      position: relative;
+    }
+    button:hover {
+      background-color: #00509e;
+    }
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    .notification {
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 5px;
+      font-weight: 500;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .loading {
+      position: relative;
+    }
+    .loading::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 5px;
+    }
+    .loading button {
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Admin Login</h2>
+    <form id="loginForm">
+      <div id="loginNotification" class="notification" style="display: none;"></div>
+      
+      <label for="email">Email</label>
+      <input type="email" id="email" required placeholder="Enter your email" autocomplete="email" value="admin@scrreddy.edu.in" />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" required placeholder="Enter your password" autocomplete="current-password" value="admin123456" />
+
+      <button type="submit" id="submitButton" class="login-btn">
+        <span class="btn-text">Login</span>
+      </button>
+    </form>
+    
+    <div style="margin-top: 15px; padding: 10px; background-color: #e8f4f8; border-radius: 5px; font-size: 14px;">
+      <strong>Firebase Authentication:</strong><br>
+      Demo: admin@scrreddy.edu.in / admin123456<br>
+      <small>Uses Firebase Auth or fallback authentication</small>
+    </div>
+  </div>
+
+  <script>
+    // Firebase Authentication login handler
+    const loginForm = document.getElementById('loginForm');
+    const submitButton = document.getElementById('submitButton');
+    
+    function showLoginMessage(message, type) {
+      const loginNotification = document.getElementById('loginNotification');
+      loginNotification.textContent = message;
+      loginNotification.className = `notification ${type}`;
+      loginNotification.style.display = 'block';
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      console.log('Firebase Auth login attempt started');
+      
+      // Disable form and show loading state
+      submitButton.disabled = true;
+      loginForm.classList.add('loading');
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      try {
+        // Sign in with Firebase Authentication
+        showLoginMessage('🔐 Authenticating with Firebase...', 'success');
+        
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        
+        console.log('Firebase Auth successful:', user.email);
+        showLoginMessage('✅ Firebase Authentication successful! Getting access token...', 'success');
+        
+        // Get Firebase ID token
+        const idToken = await user.getIdToken();
+        
+        // Verify token with backend
+        const response = await fetch('/api/auth/verify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ idToken: idToken })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Backend verification successful:', result);
+          showLoginMessage('🎉 Login successful! Redirecting to dashboard...', 'success');
+          
+          // Redirect to main homepage
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 1500);
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Backend verification failed');
+        }
+        
+      } catch (error) {
+        console.error('Login error:', error);
+        
+        // Handle Firebase Auth specific errors
+        let errorMessage = 'Login failed';
+        if (error.code) {
+          switch (error.code) {
+            case 'auth/user-not-found':
+              errorMessage = 'No user found with this email address';
+              break;
+            case 'auth/wrong-password':
+              errorMessage = 'Incorrect password';
+              break;
+            case 'auth/invalid-email':
+              errorMessage = 'Invalid email address';
+              break;
+            case 'auth/user-disabled':
+              errorMessage = 'This account has been disabled';
+              break;
+            case 'auth/too-many-requests':
+              errorMessage = 'Too many failed attempts. Please try again later';
+              break;
+            default:
+              errorMessage = error.message || 'Authentication failed';
+          }
+        } else {
+          errorMessage = error.message || 'Login failed';
+        }
+        
+        // Try fallback authentication for admin@scrreddy.edu.in
+        if (email === 'admin@scrreddy.edu.in' && password === 'admin123456') {
+          console.log('Trying fallback authentication...');
+          showLoginMessage('🔄 Firebase failed, trying fallback authentication...', 'success');
+          
+          try {
+            const fallbackResponse = await fetch('/api/auth/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ email: email, password: password })
+            });
+            
+            if (fallbackResponse.ok) {
+              const fallbackResult = await fallbackResponse.json();
+              console.log('Fallback auth successful:', fallbackResult);
+              showLoginMessage('✅ Login successful! Redirecting to dashboard...', 'success');
+              
+              // Redirect to main homepage
+              setTimeout(() => {
+                window.location.href = '/';
+              }, 1500);
+              return; // Exit the function early on success
+            }
+          } catch (fallbackError) {
+            console.error('Fallback auth also failed:', fallbackError);
+          }
+        }
+        
+        showLoginMessage('❌ ' + errorMessage, 'error');
+      } finally {
+        // Re-enable the form
+        submitButton.disabled = false;
+        loginForm.classList.remove('loading');
+      }
+    });
+
+    // Test Firebase initialization
+    console.log('Firebase Auth configured for domain:', firebaseConfig.authDomain);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Data Management - Student Result System</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(0, 51, 102, 0.9);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar h1 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar h1::before {
+            content: "📊";
+            margin-right: 0.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .header h2 {
+            color: #003366;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #666;
+        }
+
+        .files-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .files-grid {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .file-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .file-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #003366;
+            font-size: 1.1rem;
+            flex: 1;
+        }
+
+        .file-badge {
+            background: #007bff;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+
+        .file-metadata {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .metadata-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .metadata-label {
+            font-weight: 500;
+            color: #666;
+        }
+
+        .metadata-value {
+            color: #333;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 5px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: #28a745;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .empty-state::before {
+            content: "📁";
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .back-link {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>PDF Data Management</h1>
+        <a href="/dashboard" class="back-link">
+            ← Back to Dashboard
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h2>Manage PDF Data Files</h2>
+            <p>View and manage uploaded PDF data. You can delete data files to remove both local JSON and Firebase records.</p>
+        </div>
+
+        <div class="files-container">
+            <h3>📄 Uploaded PDF Data Files</h3>
+            
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                Loading PDF data files...
+            </div>
+
+            <div id="files-grid" class="files-grid" style="display: none;">
+                <!-- Files will be loaded here -->
+            </div>
+
+            <div id="empty-state" class="empty-state" style="display: none;">
+                <h3>No PDF data files found</h3>
+                <p>Upload some PDF files to see them here.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification element -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Load data files on page load
+        document.addEventListener('DOMContentLoaded', loadDataFiles);
+
+        async function loadDataFiles() {
+            try {
+                const response = await fetch('/data-files');
+                const data = await response.json();
+
+                document.getElementById('loading').style.display = 'none';
+
+                if (data.files && data.files.length > 0) {
+                    displayFiles(data.files);
+                    document.getElementById('files-grid').style.display = 'grid';
+                } else {
+                    document.getElementById('empty-state').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading data files:', error);
+                showNotification('Error loading data files: ' + error.message, 'error');
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('empty-state').style.display = 'block';
+            }
+        }
+
+        function displayFiles(files) {
+            const grid = document.getElementById('files-grid');
+            grid.innerHTML = '';
+
+            files.forEach(file => {
+                const fileCard = createFileCard(file);
+                grid.appendChild(fileCard);
+            });
+        }
+
+        function createFileCard(file) {
+            const card = document.createElement('div');
+            card.className = 'file-card';
+
+            const metadata = file.metadata || {};
+            const firebaseStatus = file.firebase_status || {};
+
+            const formatFileSize = (bytes) => {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            };
+
+            const formatDate = (dateString) => {
+                return new Date(dateString).toLocaleString();
+            };
+
+            card.innerHTML = `
+                <div class="file-header">
+                    <div class="file-name">📄 ${file.filename}</div>
+                    <div class="file-badge">${metadata.format || 'Unknown'}</div>
+                </div>
+                
+                <div class="file-metadata">
+                    <div class="metadata-item">
+                        <span class="metadata-label">File Size:</span>
+                        <span class="metadata-value">${formatFileSize(file.size)}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Created:</span>
+                        <span class="metadata-value">${formatDate(file.created)}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Students:</span>
+                        <span class="metadata-value">${metadata.total_students || 0}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Year:</span>
+                        <span class="metadata-value">${metadata.year || 'Unknown'}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Semester:</span>
+                        <span class="metadata-value">${metadata.semesters ? metadata.semesters.join(', ') : 'Unknown'}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Exam Type:</span>
+                        <span class="metadata-value">${metadata.exam_type || 'regular'}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Firebase Saved:</span>
+                        <span class="metadata-value">${firebaseStatus.students_saved || 0}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Firebase Updated:</span>
+                        <span class="metadata-value">${firebaseStatus.students_updated || 0}</span>
+                    </div>
+                </div>
+
+                <div class="file-actions">
+                    <a href="/data-files/${file.filename}" target="_blank" class="btn btn-primary">
+                        👁️ View Data
+                    </a>
+                    <button class="btn btn-danger" onclick="deletePdfData('${file.filename}')">
+                        🗑️ Delete Data
+                    </button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        async function deletePdfData(filename) {
+            if (!confirm(`Are you sure you want to delete "${filename}"?\n\nThis will permanently remove:\n- Local JSON file\n- All student records from Firebase\n\nThis action cannot be undone!`)) {
+                return;
+            }
+
+            try {
+                // Disable all delete buttons
+                const deleteButtons = document.querySelectorAll('.btn-danger');
+                deleteButtons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.textContent = '🔄 Deleting...';
+                });
+
+                const response = await fetch(`/data-files/${filename}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification(`PDF data deleted successfully!\n- Local file: ${result.details.filename}\n- Firebase records: ${result.details.firebase_records_deleted}`, 'success');
+                    
+                    // Reload the page after a short delay
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    throw new Error(result.error || 'Failed to delete PDF data');
+                }
+
+            } catch (error) {
+                console.error('Error deleting PDF data:', error);
+                showNotification('Error deleting PDF data: ' + error.message, 'error');
+                
+                // Re-enable delete buttons
+                const deleteButtons = document.querySelectorAll('.btn-danger');
+                deleteButtons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.textContent = '🗑️ Delete Data';
+                });
+            }
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Hide notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
