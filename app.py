@@ -773,7 +773,21 @@ def search_students():
         if exam_type and exam_type.lower() != 'all types':
             query = query.where('examType', '==', exam_type)
         
-        # Get documents
+        # If only student_id is provided, get all available years and semesters first
+        years_semesters = {}
+        if student_id and not semester and not exam_type:
+            all_records = db.collection('student_results').where('student_id', '==', student_id).stream()
+            for record in all_records:
+                data = record.to_dict()
+                year = data.get('year')
+                sem = data.get('semester')
+                if year and sem:
+                    if year not in years_semesters:
+                        years_semesters[year] = []
+                    if sem not in years_semesters[year]:
+                        years_semesters[year].append(sem)
+
+        # Get documents for the actual search
         docs = list(query.limit(limit).stream())
         
         # Process results
@@ -794,6 +808,10 @@ def search_students():
             result = {
                 'student_id': student_id,
                 'name': data.get('name', ''),
+                'available_years_semesters': {
+                    year: sorted(semesters) 
+                    for year, semesters in sorted(years_semesters.items())
+                } if student_id and not semester and not exam_type else None,
                 'year': data.get('year'),
                 'semester': data.get('semester'),
                 'exam_type': data.get('examType'),
