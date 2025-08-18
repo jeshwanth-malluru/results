@@ -4,6 +4,7 @@ from firebase_admin import firestore, storage
 import uuid
 from datetime import datetime
 import os
+import re
 
 notices = Blueprint('notices', __name__)
 
@@ -129,8 +130,21 @@ def create_notice():
         if valid_until:
             notice_data['validUntil'] = valid_until
 
-        # Save to Firestore
-        doc_ref = db.collection('notices').document()
+        # Generate document ID based on title
+        # Clean title for use as document ID (remove special characters, replace spaces with hyphens)
+        import re
+        clean_title = re.sub(r'[^a-zA-Z0-9\s-]', '', title)  # Remove special characters
+        clean_title = re.sub(r'\s+', '-', clean_title.strip())  # Replace spaces with hyphens
+        clean_title = clean_title.lower()  # Convert to lowercase
+        
+        # Ensure the document ID is not empty and not too long
+        if not clean_title:
+            clean_title = f"notice-{uuid.uuid4().hex[:8]}"
+        elif len(clean_title) > 100:  # Firestore document ID limit
+            clean_title = clean_title[:100]
+        
+        # Save to Firestore with title-based document ID
+        doc_ref = db.collection('notices').document(clean_title)
         doc_ref.set(notice_data)
 
         return jsonify({

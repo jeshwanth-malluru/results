@@ -215,12 +215,12 @@
 
     <form id="uploadForm" enctype="multipart/form-data">
       <div class="form-group">
-        <label>Select Year:</label>
+        <label>Select Academic Year:</label>
         <div class="options" id="yearOptions">
-          <button type="button" data-value="1 Year">1 Year</button>
-          <button type="button" data-value="2 Year">2 Year</button>
-          <button type="button" data-value="3 Year">3 Year</button>
-          <button type="button" data-value="4 Year">4 Year</button>
+          <button type="button" data-value="1">1st Year</button>
+          <button type="button" data-value="2">2nd Year</button>
+          <button type="button" data-value="3">3rd Year</button>
+          <button type="button" data-value="4">4th Year</button>
         </div>
       </div>
 
@@ -229,6 +229,12 @@
         <div class="options" id="semesterOptions">
           <button type="button" data-value="Semester 1">Semester 1</button>
           <button type="button" data-value="Semester 2">Semester 2</button>
+          <button type="button" data-value="Semester 3">Semester 3</button>
+          <button type="button" data-value="Semester 4">Semester 4</button>
+          <button type="button" data-value="Semester 5">Semester 5</button>
+          <button type="button" data-value="Semester 6">Semester 6</button>
+          <button type="button" data-value="Semester 7">Semester 7</button>
+          <button type="button" data-value="Semester 8">Semester 8</button>
         </div>
       </div>
 
@@ -254,12 +260,13 @@
       </div>
 
       <div class="form-group">
-        <label style="display: flex; align-items: center; font-weight: normal;">
-          <input type="checkbox" id="overwriteDuplicates" style="margin-right: 8px;">
-          Overwrite existing student records (if students already exist in database)
-        </label>
-        <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">
-          ⚠️ By default, duplicate students are skipped. Check this box to update existing records.
+        <div style="padding: 12px; background: #e8f5e8; border: 1px solid #c3e6c3; border-radius: 6px; margin-bottom: 15px;">
+          <div style="font-weight: bold; color: #2d5a2d; margin-bottom: 5px;">
+            ✅ Save All Data Mode
+          </div>
+          <div style="font-size: 12px; color: #2d5a2d;">
+            All student records will be saved to the database, including duplicates. Each entry will be stored with a unique timestamp.
+          </div>
         </div>
       </div>
 
@@ -332,6 +339,37 @@
           <div class="stat-label">Processing Time</div>
         </div>
       </div>
+
+      <!-- Detected Metadata Display -->
+      <div class="metadata-container" id="metadataContainer" style="display: none; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+        <h4 style="margin-top: 0; color: #495057;">📊 Detected Information</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+          <div>
+            <strong>Academic Year:</strong>
+            <div id="detected-year" style="color: #007bff; font-weight: bold;">-</div>
+          </div>
+          <div>
+            <strong>Semester:</strong>
+            <div id="detected-semester" style="color: #007bff; font-weight: bold;">-</div>
+          </div>
+          <div>
+            <strong>Exam Type:</strong>
+            <div id="detected-exam-type" style="color: #007bff; font-weight: bold;">-</div>
+          </div>
+          <div>
+            <strong>Format:</strong>
+            <div id="detected-format" style="color: #007bff; font-weight: bold;">-</div>
+          </div>
+          <div>
+            <strong>Year-Semester Code:</strong>
+            <div id="detected-year-semester" style="color: #28a745; font-weight: bold;">-</div>
+          </div>
+          <div>
+            <strong>Processing Date:</strong>
+            <div id="processing-date" style="color: #6c757d;">-</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -398,16 +436,13 @@
               
               if (progress.firebase) {
                 const saved = progress.firebase.students_saved || 0;
-                const skipped = progress.firebase.students_skipped || 0;
                 const total = progress.firebase.total_students || 0;
                 
-                if (skipped > 0 && saved === 0) {
-                  completionMessage = `ℹ️ Upload complete! All ${total} students already existed in database. Use "Overwrite duplicates" option to update existing records.`;
+                if (saved > 0) {
+                  completionMessage = `✅ Upload complete! Successfully saved all ${saved} students to database.`;
+                } else {
+                  completionMessage = `⚠️ Upload complete but no students were saved. Please check the logs.`;
                   messageType = 'warning';
-                } else if (skipped > 0) {
-                  completionMessage = `✅ Upload complete! Saved ${saved} new students, skipped ${skipped} duplicates.`;
-                } else if (saved > 0) {
-                  completionMessage = `✅ Upload complete! Successfully saved ${saved} students to database.`;
                 }
               }
               showNotification(completionMessage, messageType);
@@ -448,18 +483,15 @@
         let message = progress.firebase.message || 'Uploading to Firebase...';
         let status = progress.firebase.status;
         
-        // Improve messaging for duplicate scenarios
+        // Improve messaging for all data save scenarios
         if (progress.firebase.status === 'completed') {
           const saved = progress.firebase.students_saved || 0;
-          const skipped = progress.firebase.students_skipped || 0;
           const total = progress.firebase.total_students || 0;
           
-          if (skipped > 0 && saved === 0) {
-            message = `All ${total} students already exist in database (${skipped} duplicates skipped)`;
-          } else if (skipped > 0) {
-            message = `Saved ${saved} new students, skipped ${skipped} duplicates`;
+          if (saved > 0) {
+            message = `Successfully saved all ${saved} students to database`;
           } else {
-            message = `Successfully saved ${saved} students to database`;
+            message = `No students were saved - please check the logs`;
           }
         }
         
@@ -573,6 +605,7 @@
       document.querySelector('#formatOptions button[data-value="jntuk"]').click();
       document.getElementById('progressContainer').style.display = 'none';
       document.getElementById('statsContainer').style.display = 'none';
+      document.getElementById('metadataContainer').style.display = 'none';
     }
 
     function updateStep(stepId, status, message) {
@@ -639,6 +672,9 @@
       // Show statistics
       showStatistics(result.processed_count || 0, result.firebase?.students_saved || 0, processingTime);
       
+      // Display detected metadata
+      displayDetectedMetadata(result);
+      
       // Reset form on success after a delay
       setTimeout(() => {
         uploadForm.reset();
@@ -646,6 +682,60 @@
         // Re-set default format
         document.querySelector('#formatOptions button[data-value="jntuk"]').click();
       }, 3000);
+    }
+
+    function displayDetectedMetadata(result) {
+      const metadataContainer = document.getElementById('metadataContainer');
+      
+      if (result.metadata) {
+        const metadata = result.metadata;
+        
+        // Get values from metadata
+        const format = metadata.format || 'Unknown';
+        const examType = metadata.exam_type || 'regular';
+        const userYear = metadata.year || 'Unknown';
+        const userSemester = metadata.semester || 'Unknown';
+        
+        // Convert year format for display
+        let displayYear = userYear;
+        if (typeof userYear === 'number') {
+          displayYear = `${userYear}${getOrdinalSuffix(userYear)} Year`;
+        }
+        
+        // Extract semester number for year-semester code
+        let yearSemesterCode = 'Unknown';
+        if (userSemester && typeof userYear === 'number') {
+          try {
+            const semNum = userSemester.includes('Semester') ? 
+              parseInt(userSemester.split(' ')[1]) : parseInt(userSemester);
+            if (semNum) {
+              yearSemesterCode = `${userYear}-${semNum}`;
+            }
+          } catch (e) {
+            yearSemesterCode = `${userYear}_${userSemester}`;
+          }
+        }
+        
+        // Update the display
+        document.getElementById('detected-year').textContent = displayYear;
+        document.getElementById('detected-semester').textContent = userSemester;
+        document.getElementById('detected-exam-type').textContent = examType.charAt(0).toUpperCase() + examType.slice(1);
+        document.getElementById('detected-format').textContent = format.toUpperCase();
+        document.getElementById('detected-year-semester').textContent = yearSemesterCode;
+        document.getElementById('processing-date').textContent = new Date().toLocaleString();
+        
+        // Show the metadata container
+        metadataContainer.style.display = 'block';
+      }
+    }
+    
+    function getOrdinalSuffix(num) {
+      const j = num % 10;
+      const k = num % 100;
+      if (j == 1 && k != 11) return "st";
+      if (j == 2 && k != 12) return "nd";
+      if (j == 3 && k != 13) return "rd";
+      return "th";
     }
 
     function activateButtons(groupId, hiddenInputId) {
@@ -688,9 +778,17 @@
       }
 
       // Set default values for required fields that aren't visible
-      document.getElementById('examTypeInput').value = 'regular';
-      document.getElementById('yearInput').value = '2024';
-      document.getElementById('semesterInput').value = '1';
+      // Only set defaults if user hasn't selected anything
+      if (!document.getElementById('examTypeInput').value) {
+        document.getElementById('examTypeInput').value = 'regular';
+      }
+      
+      // Don't override user year selection - let it be empty if not selected
+      // document.getElementById('yearInput').value = '2024';  // REMOVED: This was overriding user selection
+      
+      if (!document.getElementById('semesterInput').value) {
+        document.getElementById('semesterInput').value = '1';
+      }
 
       // Start loading state and show progress
       uploadBtn.disabled = true;
@@ -708,7 +806,19 @@
       const formData = new FormData();
       formData.append('file', fileInput.files[0]);
       formData.append('format', format);
-      formData.append('exam_type', 'regular'); // Default value
+      
+      // Get user selections
+      const selectedYear = document.getElementById('yearInput').value;
+      const selectedSemester = document.getElementById('semesterInput').value;
+      const selectedExamType = document.getElementById('examTypeInput').value;
+      
+      // Include user selections in form data
+      if (selectedYear) formData.append('year', selectedYear);
+      if (selectedSemester) formData.append('semester', selectedSemester);
+      if (selectedExamType) formData.append('exam_type', selectedExamType);
+      
+      // Default to regular if no exam type selected
+      if (!selectedExamType) formData.append('exam_type', 'regular');
 
       try {
         // Step 1: Start parsing
