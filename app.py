@@ -34,7 +34,7 @@ if not firebase_admin._apps:
         if os.path.exists('serviceAccount.json'):
             cred = credentials.Certificate('serviceAccount.json')
             firebase_admin.initialize_app(cred, {
-                'storageBucket': 'plant-ec218.appspot.com'
+                'storageBucket': 'plant-ec218.firebasestorage.app'
             })
             logger.info("Firebase initialized with service account")
         else:
@@ -197,7 +197,7 @@ FIREBASE_CONFIG = {
     "apiKey": "AIzaSyBYY_k5TK-OaQnkc82w-lxJ54bJGqcWZI4",
     "authDomain": "plant-ec218.firebaseapp.com", 
     "projectId": "plant-ec218",
-    "storageBucket": "plant-ec218.appspot.com",
+    'storageBucket': 'plant-ec218.firebasestorage.app',
     "messagingSenderId": "451074734549",
     "appId": "1:451074734549:web:abc123def456"
 }
